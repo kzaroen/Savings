@@ -1,6 +1,3 @@
-venv\Scripts\activate
-streamlit run app.py
-
 # 💹 2026 Financial Command Center
 
 A fully interactive financial dashboard built with Streamlit + Plotly, based on your 2026 Money Monthly Tracker.
