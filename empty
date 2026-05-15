@@ -1,0 +1,123 @@
+import streamlit as st
+import pandas as pd
+import plotly.graph_objects as go
+
+# ─── Page Config ─────────────────────────────────────────────
+st.set_page_config(
+    page_title="Financial Dashboard",
+    page_icon="📊",
+    layout="wide",
+)
+
+# ─── Theme Colors (editable) ─────────────────────────────────
+BG = "#ffffff"
+TEXT = "#333333"
+
+# ─── Base Layout ─────────────────────────────────────────────
+def base_layout(title="", h=340):
+    return dict(
+        title=title,
+        plot_bgcolor=BG,
+        paper_bgcolor=BG,
+        font=dict(color=TEXT),
+        height=h,
+    )
+
+# ─── Constants ───────────────────────────────────────────────
+MONTHS = ["Jan","Feb","Mar","Apr","May","Jun",
+          "Jul","Aug","Sep","Oct","Nov","Dec"]
+
+# ─── Default Empty Data ──────────────────────────────────────
+EMPTY = [0] * 12
+
+FIXED_INSURANCE   = EMPTY.copy()
+FIXED_INVESTMENTS = EMPTY.copy()
+FIXED_SAVINGS     = EMPTY.copy()
+FIXED_EXPENSES    = EMPTY.copy()
+FIXED_INCOME      = EMPTY.copy()
+
+# ─── Goals Template ──────────────────────────────────────────
+GOALS = [
+    {"label": "Goal 1", "current": 0, "target": 10000},
+    {"label": "Goal 2", "current": 0, "target": 10000},
+]
+
+# ─── Sidebar Inputs ──────────────────────────────────────────
+st.sidebar.header("Inputs")
+
+income_inputs = {}
+expense_inputs = {}
+
+for i, m in enumerate(MONTHS):
+    income_inputs[m] = st.sidebar.number_input(f"{m} Income", 0, 100000, 0)
+    expense_inputs[m] = st.sidebar.number_input(f"{m} Expenses", 0, 100000, 0)
+
+# ─── Build DataFrame ─────────────────────────────────────────
+def build_df():
+    rows = []
+    cumulative = 0
+
+    for i, m in enumerate(MONTHS):
+        income = income_inputs[m]
+        expense = expense_inputs[m]
+
+        net = income - expense
+        cumulative += net
+
+        rows.append({
+            "Month": m,
+            "Income": income,
+            "Expenses": expense,
+            "Net": net,
+            "Cumulative": cumulative
+        })
+
+    return pd.DataFrame(rows)
+
+df = build_df()
+
+# ─── KPIs ───────────────────────────────────────────────────
+st.title("Financial Dashboard")
+
+col1, col2, col3 = st.columns(3)
+
+col1.metric("Total Income", f"{df['Income'].sum():,.0f}")
+col2.metric("Total Expenses", f"{df['Expenses'].sum():,.0f}")
+col3.metric("Net Savings", f"{df['Net'].sum():,.0f}")
+
+# ─── Chart: Cash Flow ───────────────────────────────────────
+fig = go.Figure()
+
+fig.add_bar(x=df["Month"], y=df["Income"], name="Income")
+fig.add_bar(x=df["Month"], y=df["Expenses"], name="Expenses")
+fig.add_scatter(x=df["Month"], y=df["Net"], name="Net", mode="lines+markers")
+
+fig.update_layout(**base_layout("Monthly Cash Flow"))
+
+st.plotly_chart(fig, use_container_width=True)
+
+# ─── Chart: Cumulative ──────────────────────────────────────
+fig2 = go.Figure()
+
+fig2.add_scatter(
+    x=df["Month"],
+    y=df["Cumulative"],
+    mode="lines+markers",
+    name="Cumulative"
+)
+
+fig2.update_layout(**base_layout("Cumulative Savings"))
+
+st.plotly_chart(fig2, use_container_width=True)
+
+# ─── Goals Section ──────────────────────────────────────────
+st.subheader("Goals")
+
+for g in GOALS:
+    progress = (g["current"] / g["target"]) * 100 if g["target"] else 0
+    st.progress(progress / 100)
+    st.write(f"{g['label']}: {progress:.1f}%")
+
+# ─── Table ─────────────────────────────────────────────────
+st.subheader("Monthly Breakdown")
+st.dataframe(df, use_container_width=True)
