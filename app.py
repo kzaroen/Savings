@@ -6,8 +6,9 @@ import random
 
 from supabase import create_client
 
-SUPABASE_URL = st.secrets["https://pdlhyhnypcgpqpcdptdv.supabase.co"]
-SUPABASE_KEY = st.secrets["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkbHloaG55Y3BncXBqY2RwdGR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MzUwNTMsImV4cCI6MjA5NDQxMTA1M30.MGGjoF6G7nFD_LorHTrixsVpQRMEEqaGTg1NbVZi9-Y"]
+# ─── Supabase Connection ─────────────────────────────
+SUPABASE_URL = st.secrets["SUPABASE_URL"]
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
