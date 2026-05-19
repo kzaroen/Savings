@@ -1,13 +1,15 @@
-from supabase import create_client
-SUPABASE_URL = "https://pdlyhhnycpgqpjcdptdv.supabase.co"
-SUPABASE_KEY = "sb_publishable_IMaJ8UDxQe_le826955AXg_wOsL229b"
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import random
+
+from supabase import create_client
+
+SUPABASE_URL = st.secrets["https://pdlhyhnypcgpqpcdptdv.supabase.co"]
+SUPABASE_KEY = st.secrets["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkbHloaG55Y3BncXBqY2RwdGR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MzUwNTMsImV4cCI6MjA5NDQxMTA1M30.MGGjoF6G7nFD_LorHTrixsVpQRMEEqaGTg1NbVZi9-Y"]
+
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # ─── Page Config ────────────────────────────────────────────────────────────
 st.set_page_config(
