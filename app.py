@@ -425,6 +425,14 @@ with st.sidebar:
 
                 st.success("Snapshots reset.")
 
+    if st.button("Test Save"):
+        supabase.table("monthly_finance").insert({
+            "month": "Jan",
+            "income": 7000,
+            "expenses": 1000,
+            "notes": "Test entry"
+        }).execute()
+
     # ── Verse ──
     if "verse" not in st.session_state:
         st.session_state.verse = random.choice(VERSES)
@@ -437,13 +445,8 @@ with st.sidebar:
         "May you be guided by Jesus Christ. God will provide, and He will always provide more than enough."
     )
     
-if st.button("Test Save"):
-    supabase.table("monthly_finance").insert({
-        "month": "Jan",
-        "income": 7000,
-        "expenses": 1000,
-        "notes": "Test entry"
-    }).execute()
+    
+
 
     st.success("Saved to database!")    
 
