@@ -222,20 +222,23 @@ def goal_status_label(pct):
 # ─── Single load per session ──────────────────────────────────────────────────
 
 def load_monthly_finance():
-    rows = supabase.table("monthly_finance").select("*").execute().data or []
+    try:
+        rows = supabase.table("monthly_finance").select("*").execute().data or []
+    except Exception as e:
+        st.error(f"Supabase load failed: {e}")
+        rows = []
 
-    data = {
-        "income": {m: 0 for m in MONTHS},
-        "expenses": {m: 0 for m in MONTHS},
-    }
+    income = {m: 0.0 for m in MONTHS}
+    expenses = {m: 0.0 for m in MONTHS}
 
-    for r in rows:
-        m = r["month"]
-        if m in data["income"]:
-            data["income"][m] = float(r.get("income") or 0)
-            data["expenses"][m] = float(r.get("expenses") or 0)
+    for row in rows:
+        month = row.get("month")
+        if month in MONTHS:
+            income[month] = float(row.get("income") or 0)
+            expenses[month] = float(row.get("expenses") or 0)
 
-    return data
+    return {"income": income, "expenses": expenses}
+
 
 finance = load_monthly_finance()
 
@@ -272,13 +275,28 @@ def build_df():
 
 
 def load_goals():
-    rows = supabase.table("goals").select("*").execute().data or []
-    return {r["label"]: float(r["current_value"] or 0) for r in rows}
+    try:
+        rows = supabase.table("goals").select("*").execute().data or []
+    except Exception as e:
+        st.error(f"Supabase load failed: {e}")
+        rows = []
+    
+    data = {r["label"]: float(r["current_value"] or 0) for r in rows}
+
+    for g in GOALS_CONFIG:
+        if g["label"] not in data:
+            data[g["label"]] = 0.0
+
+    return data
 
 goals = load_goals()
 
 def load_snapshots():
-    rows = supabase.table("investment_snapshots").select("*").execute().data or []
+    try:
+        rows = supabase.table("investment_snapshots").select("*").execute().data or []
+    except Exception as e:
+        st.error(f"Supabase load failed: {e}")
+        rows = []
 
     return sorted(rows, key=lambda x: MONTH_INDEX.get(x["snapshot_date"], 999))
 
@@ -396,7 +414,7 @@ with st.sidebar:
                 st.number_input(
                     f"{g['icon']} {label}",
                     min_value=0.0, max_value=float(g["target"] * 2),
-                    value=goals[label], step=step, format="%.0f",
+                    value=goals.get(label, 0.0), step=step, format="%.0f",
                     key=f"goal_{label}",
                     help=g["desc"],
                 )
@@ -413,7 +431,7 @@ with st.sidebar:
     with st.expander("Monthly Deposits", expanded=False):
         with st.form("income_form"):
             for m in MONTHS:
-                st.number_input(m, 0, 50000, income_map[m], 500,
+                st.number_input(m, 0.0, 50000.0, income_map[m], 500.0,
                                 key=f"income_{m}",
                                 help=f"Total cash you set aside in {m}")
             if st.form_submit_button("Save Deposits", use_container_width=True):
@@ -429,7 +447,7 @@ with st.sidebar:
     with st.expander("Monthly Expenses", expanded=False):
         with st.form("expenses_form"):
             for m in MONTHS:
-                st.number_input(m, 0, 50000, expenses_map[m], 500,
+                st.number_input(m, 0.0, 50000.0, expenses_map[m], 500.0,
                                 key=f"expense_{m}",
                                 help=f"Total spent in {m} (excluding insurance & investments)")
             if st.form_submit_button("Save Expenses", use_container_width=True):
