@@ -298,7 +298,7 @@ def load_snapshots():
         st.error(f"Supabase load failed: {e}")
         rows = []
 
-    return sorted(rows, key=lambda x: MONTH_INDEX.get(x["snapshot_date"], 999))
+    return sorted(rows, key=lambda x: MONTH_INDEX.get(x["date"], 999))
 
 goals_map = goals
 
