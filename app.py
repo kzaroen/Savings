@@ -219,50 +219,70 @@ def goal_status_label(pct):
 # ═══════════════════════════════════════════════════════════════════════════════
 # SUPABASE — Load & Save
 # ═══════════════════════════════════════════════════════════════════════════════
+# ─── Single load per session ──────────────────────────────────────────────────
 
-@st.cache_data(ttl=300, show_spinner=False)
-def load_from_supabase():
-    """Load all tables. Cached for 5 minutes to prevent re-fetching on every widget change."""
+def load_monthly_finance():
+    rows = supabase.table("monthly_finance").select("*").execute().data or []
+
     data = {
-        "income":    {m: 5000 for m in MONTHS},
-        "expenses":  {m: 0    for m in MONTHS},
-        "goals":     {g["label"]: 0.0 for g in GOALS_CONFIG},
-        "snapshots": [s.copy() for s in INITIAL_SNAPSHOTS],
+        "income": {m: 0 for m in MONTHS},
+        "expenses": {m: 0 for m in MONTHS},
     }
-    try:
-        rows = supabase.table("monthly_finance").select("*").execute().data
-        for row in rows:
-            m = row["month"]
-            if m in data["income"]:
-                data["income"][m]   = float(row.get("income",   0) or 0)
-                data["expenses"][m] = float(row.get("expenses", 0) or 0)
 
-        rows = supabase.table("goals").select("*").execute().data
-        for row in rows:
-            lbl = row["label"]
-            if lbl in data["goals"]:
-                data["goals"][lbl] = float(row.get("current_value", 0) or 0)
-
-        rows = supabase.table("investment_snapshots").select("*").execute().data
-        if rows:
-            data["snapshots"] = [
-                {
-                    "date":        row["snapshot_date"],
-                    "us_equity":   float(row.get("us_equity",   0) or 0),
-                    "bond_fund":   float(row.get("bond_fund",   0) or 0),
-                    "bond_income": float(row.get("bond_income", 0) or 0),
-                    "official":    bool(row.get("official", False)),
-                    "planned":     bool(row.get("planned",  False)),
-                }
-                for row in rows
-            ]
-            data["snapshots"].sort(key=lambda x: MONTH_INDEX.get(x["date"], 999))
-
-    except Exception as e:
-        st.warning(f"Could not load from Supabase: {e}")
+    for r in rows:
+        m = r["month"]
+        if m in data["income"]:
+            data["income"][m] = float(r.get("income") or 0)
+            data["expenses"][m] = float(r.get("expenses") or 0)
 
     return data
 
+finance = load_monthly_finance()
+
+
+income_map = finance["income"]
+expenses_map = finance["expenses"]
+
+def build_df():
+    rows = []
+    cum = 0
+
+    for i, m in enumerate(MONTHS):
+        inc = income_map.get(m, 0)
+        exp = expenses_map.get(m, 0)
+
+        ins = FIXED_INSURANCE[i]
+        inv = FIXED_INVESTMENTS[i]
+
+        net = inc - exp - inv - (ins if m != "Jan" else 0)
+        cum += net
+
+        rows.append({
+            "Month": m,
+            "Insurance": ins,
+            "Investments": inv,
+            "Savings Deposited": inc,
+            "Money Spent": exp,
+            "Kept for Future": net,
+            "Cumulative": cum,
+        })
+
+    return pd.DataFrame(rows)
+
+
+
+def load_goals():
+    rows = supabase.table("goals").select("*").execute().data or []
+    return {r["label"]: float(r["current_value"] or 0) for r in rows}
+
+goals = load_goals()
+
+def load_snapshots():
+    rows = supabase.table("investment_snapshots").select("*").execute().data or []
+
+    return sorted(rows, key=lambda x: MONTH_INDEX.get(x["snapshot_date"], 999))
+
+goals_map = goals
 
 def save_monthly(month, income, expenses):
     try:
@@ -270,10 +290,14 @@ def save_monthly(month, income, expenses):
             {"month": month, "income": income, "expenses": expenses},
             on_conflict="month"
         ).execute()
-        st.cache_data.clear()
+        load_monthly_finance()
+        load_goals()
+        load_snapshots()
+        
     except Exception as e:
         st.error(f"Save failed for {month}: {e}")
-
+        
+snapshots = load_snapshots()
 
 def save_goal(label, current_value):
     try:
@@ -288,10 +312,13 @@ def save_goal(label, current_value):
             },
             on_conflict="label"
         ).execute()
-        st.cache_data.clear()
+        load_monthly_finance()
+        load_goals()
+        load_snapshots()
+        
     except Exception as e:
         st.error(f"Save failed for goal {label}: {e}")
-
+        
 
 def save_snapshot(snap):
     try:
@@ -306,7 +333,9 @@ def save_snapshot(snap):
             },
             on_conflict="snapshot_date"
         ).execute()
-        st.cache_data.clear()
+        load_monthly_finance()
+        load_goals()
+        load_snapshots()
     except Exception as e:
         st.error(f"Save failed for snapshot {snap['date']}: {e}")
 
@@ -314,14 +343,17 @@ def save_snapshot(snap):
 def delete_snapshot(date_label):
     try:
         supabase.table("investment_snapshots").delete().eq("snapshot_date", date_label).execute()
-        st.cache_data.clear()
+        load_monthly_finance()
+        load_goals()
+        load_snapshots()
+        
     except Exception as e:
         st.error(f"Delete failed for {date_label}: {e}")
-
-
+        
 def reset_snapshots_in_db():
     try:
         supabase.table("investment_snapshots").delete().neq("id", 0).execute()
+
         for s in INITIAL_SNAPSHOTS:
             supabase.table("investment_snapshots").insert({
                 "snapshot_date": s["date"],
@@ -331,45 +363,21 @@ def reset_snapshots_in_db():
                 "official":      s["official"],
                 "planned":       s["planned"],
             }).execute()
-        st.cache_data.clear()
+
+        load_monthly_finance()
+        load_goals()
+        load_snapshots()
+
     except Exception as e:
         st.error(f"Reset failed: {e}")
 
-
-# ─── Single load per session ──────────────────────────────────────────────────
-if "data" not in st.session_state:
-    st.session_state.data = load_from_supabase()
-
+# ══════════════════════════════════════════════════════════════════════════════
+# SIDEBAR
+# ═══════════════════════════════════════════════════════════════════════════════
 if "verse" not in st.session_state:
     st.session_state.verse = random.choice(VERSES)
 
-D = st.session_state.data
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# FINANCIAL ENGINE
-# ═══════════════════════════════════════════════════════════════════════════════
-
-def build_df():
-    rows = []
-    cum  = 0
-    for i, m in enumerate(MONTHS):
-        inc = D["income"][m]
-        exp = D["expenses"][m]
-        ins = FIXED_INSURANCE[i]
-        inv = FIXED_INVESTMENTS[i]
-        net = inc - exp - inv - (ins if m != "Jan" else 0)
-        cum += net
-        rows.append({
-            "Month": m, "Insurance": ins, "Investments": inv,
-            "Savings Deposited": inc, "Money Spent": exp,
-            "Kept for Future": net, "Cumulative": cum,
-        })
-    return pd.DataFrame(rows)
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# SIDEBAR
-# ═══════════════════════════════════════════════════════════════════════════════
-
+verse_data = st.session_state.verse
 with st.sidebar:
     st.markdown("# This is for my future self")
     st.markdown(
@@ -388,15 +396,15 @@ with st.sidebar:
                 st.number_input(
                     f"{g['icon']} {label}",
                     min_value=0.0, max_value=float(g["target"] * 2),
-                    value=D["goals"][label], step=step, format="%.0f",
+                    value=goals[label], step=step, format="%.0f",
                     key=f"goal_{label}",
                     help=g["desc"],
                 )
             if st.form_submit_button("Save Goals", use_container_width=True):
                 for g in GOALS_CONFIG:
                     new_val = st.session_state[f"goal_{g['label']}"]
-                    if new_val != D["goals"][g["label"]]:
-                        D["goals"][g["label"]] = new_val
+                    if new_val != goals[g["label"]]:
+                        goals[g["label"]] = new_val
                         save_goal(g["label"], new_val)
                 st.success("Goals saved!")
 
@@ -405,15 +413,15 @@ with st.sidebar:
     with st.expander("Monthly Deposits", expanded=False):
         with st.form("income_form"):
             for m in MONTHS:
-                st.number_input(m, 0, 50000, D["income"][m], 500,
+                st.number_input(m, 0, 50000, income_map[m], 500,
                                 key=f"income_{m}",
                                 help=f"Total cash you set aside in {m}")
             if st.form_submit_button("Save Deposits", use_container_width=True):
                 for m in MONTHS:
                     new_inc = st.session_state[f"income_{m}"]
-                    if new_inc != D["income"][m]:
-                        D["income"][m] = new_inc
-                        save_monthly(m, new_inc, D["expenses"][m])
+                    if new_inc != income_map[m]:
+                        income_map[m] = new_inc
+                        save_monthly(m, new_inc, expenses_map[m])
                 st.success("Deposits saved!")
 
     # ── Expenses ──
@@ -421,15 +429,15 @@ with st.sidebar:
     with st.expander("Monthly Expenses", expanded=False):
         with st.form("expenses_form"):
             for m in MONTHS:
-                st.number_input(m, 0, 50000, D["expenses"][m], 500,
+                st.number_input(m, 0, 50000, expenses_map[m], 500,
                                 key=f"expense_{m}",
                                 help=f"Total spent in {m} (excluding insurance & investments)")
             if st.form_submit_button("Save Expenses", use_container_width=True):
                 for m in MONTHS:
                     new_exp = st.session_state[f"expense_{m}"]
-                    if new_exp != D["expenses"][m]:
-                        D["expenses"][m] = new_exp
-                        save_monthly(m, D["income"][m], new_exp)
+                    if new_exp != expenses_map[m]:
+                        expenses_map[m] = new_exp
+                        save_monthly(m, income_map[m], new_exp)
                 st.success("Expenses saved!")
 
     # ── Investment Snapshots ──
@@ -450,21 +458,21 @@ with st.sidebar:
                         "bond_fund": snap_bond, "bond_income": snap_bincome,
                         "official": snap_official, "planned": snap_planned,
                     }
-                    existing_dates = [s["date"] for s in D["snapshots"]]
+                    existing_dates = [s["date"] for s in snapshots]
                     if snap_date in existing_dates:
-                        D["snapshots"][existing_dates.index(snap_date)] = new_snap
+                        snapshots[existing_dates.index(snap_date)] = new_snap
                     else:
-                        D["snapshots"].append(new_snap)
-                    D["snapshots"].sort(key=lambda x: MONTH_INDEX.get(x["date"], 999))
+                        snapshots.append(new_snap)
+                    snapshots.sort(key=lambda x: MONTH_INDEX.get(x["date"], 999))
                     save_snapshot(new_snap)
                     st.success(f"Snapshot saved: {snap_date}")
 
     with st.expander("Edit / Delete Snapshot", expanded=False):
-        if D["snapshots"]:
-            snap_labels = [s["date"] for s in D["snapshots"]]
+        if snapshots:
+            snap_labels = [s["date"] for s in snapshots]
             edit_date   = st.selectbox("Select snapshot to edit", snap_labels, key="edit_select")
             edit_idx    = snap_labels.index(edit_date)
-            s           = D["snapshots"][edit_idx]
+            s           = snapshots[edit_idx]
             with st.form("edit_snap_form"):
                 e_eq  = st.number_input("US Equity (₱)",    value=float(s["us_equity"]),   step=10.0, format="%.2f", key="e_eq")
                 e_bf  = st.number_input("Bond Fund (₱)",    value=float(s["bond_fund"]),   step=10.0, format="%.2f", key="e_bf")
@@ -480,24 +488,25 @@ with st.sidebar:
             if save_btn:
                 updated = {"date": edit_date, "us_equity": e_eq, "bond_fund": e_bf,
                            "bond_income": e_bi, "official": e_off, "planned": e_pln}
-                D["snapshots"][edit_idx] = updated
+                snapshots[edit_idx] = updated
                 save_snapshot(updated)
                 st.success("Saved!")
 
             if del_btn:
                 delete_snapshot(edit_date)
-                D["snapshots"].pop(edit_idx)
+                snapshots.pop(edit_idx)
                 st.success(f"Deleted: {edit_date}")
                 st.rerun()
 
         if st.button("↺ Reset All Snapshots to Defaults", use_container_width=True):
             reset_snapshots_in_db()
-            D["snapshots"] = [s.copy() for s in INITIAL_SNAPSHOTS]
-            D["snapshots"].sort(key=lambda x: MONTH_INDEX.get(x["date"], 999))
+            snapshots = [s.copy() for s in INITIAL_SNAPSHOTS]
+            snapshots.sort(key=lambda x: MONTH_INDEX.get(x["date"], 999))
             st.success("Snapshots reset.")
             st.rerun()
 
     # ── Verse ──
+
     st.markdown("---")
     ref, verse = st.session_state.verse
     st.caption(f"**{ref}**  \n*{verse}*")
@@ -507,9 +516,19 @@ with st.sidebar:
         "May you be guided by Jesus Christ. God will provide, and He will always provide more than enough."
     )
 
+
+# fix if anything weird gets stored
+if not isinstance(verse_data, (list, tuple)) or len(verse_data) != 2:
+    verse_data = random.choice(VERSES)
+    st.session_state.verse = verse_data
+
+ref, verse = verse_data    
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # BUILD DATA
 # ═══════════════════════════════════════════════════════════════════════════════
+
+
 
 baseline_df = build_df()
 
@@ -522,16 +541,16 @@ worst_month       = baseline_df.loc[baseline_df["Kept for Future"].idxmin(), "Mo
 neg_months        = baseline_df[baseline_df["Kept for Future"] < 0]["Month"].tolist()
 floor_months      = [
     m for m in MONTHS
-    if D["income"][m] - D["expenses"][m] < SAVINGS_FLOOR and D["income"][m] > 0
+    if income_map[m] - expenses_map[m] < SAVINGS_FLOOR and income_map[m] > 0
 ]
 
-bond_income_ytd  = sum(s["bond_income"] for s in D["snapshots"])
+bond_income_ytd  = sum(s["bond_income"] for s in snapshots)
 invest_vs_save   = (total_investments / total_income * 100) if total_income else 0
 savings_rate_ytd = ((total_income - total_expenses) / total_income * 100) if total_income else 0
 
 # ── Investment P&L ──
 actual_snaps = sorted(
-    [s for s in D["snapshots"] if s["official"] and s["us_equity"] > 0],
+    [s for s in snapshots if s["official"] and s["us_equity"] > 0],
     key=lambda x: MONTH_INDEX.get(x["date"], 999),
 )
 latest_snap   = actual_snaps[-1] if actual_snaps else None
@@ -686,7 +705,7 @@ with col_ms:
 st.markdown('<div class="section-header">🎯 Goals</div>', unsafe_allow_html=True)
 goal_cols = st.columns(4)
 for idx, g in enumerate(GOALS_CONFIG):
-    current_val = D["goals"][g["label"]]
+    current_val = goals_map.get(g["label"], 0)
     target_val  = g["target"]
     pct         = min(current_val / target_val * 100, 100) if target_val else 0
     status_key, status_text = goal_status_label(pct)
@@ -759,7 +778,7 @@ with col_c:
     st.plotly_chart(fig3, use_container_width=True)
 
 with col_d:
-    snap_sorted   = sorted(D["snapshots"], key=lambda x: MONTH_INDEX.get(x["date"], 999))
+    snap_sorted   = sorted(snapshots, key=lambda x: MONTH_INDEX.get(x["date"], 999))
     actual_months = [s["date"]     for s in snap_sorted if s["us_equity"] > 0]
     actual_eq     = [s["us_equity"] for s in snap_sorted if s["us_equity"] > 0]
     actual_bd     = [s["bond_fund"] for s in snap_sorted if s["us_equity"] > 0]
@@ -788,9 +807,9 @@ st.markdown('<div class="section-header">📸 Portfolio Snapshots</div>', unsafe
 col_e, col_f = st.columns([3, 2])
 
 with col_e:
-    total_snap_income = sum(s["bond_income"] for s in D["snapshots"])
+    total_snap_income = sum(s["bond_income"] for s in snapshots)
     rows_html = ""
-    for s in D["snapshots"]:
+    for s in snapshots:
         row_total  = s["us_equity"] + s["bond_fund"]
         unreal     = row_total - total_cost_basis if row_total > 0 else 0
         unreal_cls = "val-pos" if unreal > 0 else ("val-neg" if unreal < 0 else "val-zero")
@@ -878,9 +897,9 @@ tracker_df = pd.DataFrame([
         "Month": m,
         "Insurance": FIXED_INSURANCE[i],
         "Investments": FIXED_INVESTMENTS[i],
-        "Savings Deposited": D["income"][m],
-        "Money Spent": D["expenses"][m],
-        "Kept for Future": D["income"][m] - D["expenses"][m] - FIXED_INVESTMENTS[i]
+        "Savings Deposited": income_map[m],
+        "Money Spent": expenses_map[m],
+        "Kept for Future": income_map[m] - expenses_map[m] - FIXED_INVESTMENTS[i]
                            - (FIXED_INSURANCE[i] if m != "Jan" else 0),
         "Notes": NOTES[i],
     }
