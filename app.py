@@ -291,6 +291,9 @@ def load_goals():
 
 goals = load_goals()
 
+def get_snap_date(x):
+    return x.get("snapshot_date")
+
 def load_snapshots():
     try:
         rows = supabase.table("investment_snapshots_view").select("*").execute().data or []
@@ -298,7 +301,7 @@ def load_snapshots():
         st.error(f"Supabase load failed: {e}")
         rows = []
 
-    return sorted(rows, key=lambda x: MONTH_INDEX.get(x["snapshot_date"], 999))
+    return sorted(rows, key=lambda x: MONTH_INDEX.get(get_snap_date(x), 999))
 
 goals_map = goals
 
@@ -374,7 +377,7 @@ def reset_snapshots_in_db():
 
         for s in INITIAL_SNAPSHOTS:
             supabase.table("investment_snapshots").insert({
-                "snapshot_date": s["date"],
+                "snapshot_date": get_snap_date(s),
                 "us_equity":     s["us_equity"],
                 "bond_fund":     s["bond_fund"],
                 "bond_income":   s["bond_income"],
@@ -476,12 +479,12 @@ with st.sidebar:
                         "bond_fund": snap_bond, "bond_income": snap_bincome,
                         "official": snap_official, "planned": snap_planned,
                     }
-                    existing_dates = [s["date"] for s in snapshots]
+                    existing_dates = [get_snap_date(s) for s in snapshots]
                     if snap_date in existing_dates:
                         snapshots[existing_dates.index(snap_date)] = new_snap
                     else:
                         snapshots.append(new_snap)
-                    snapshots.sort(key=lambda x: MONTH_INDEX.get(x["snapshot_date"], 999))
+                    snapshots.sort(key=lambda x: MONTH_INDEX.get(get_snap_date(x), 999))
                     save_snapshot(new_snap)
                     st.success(f"Snapshot saved: {snap_date}")
 
@@ -519,7 +522,7 @@ with st.sidebar:
         if st.button("↺ Reset All Snapshots to Defaults", use_container_width=True):
             reset_snapshots_in_db()
             snapshots = [s.copy() for s in INITIAL_SNAPSHOTS]
-            snapshots.sort(key=lambda x: MONTH_INDEX.get(x["snapshot_date"], 999))
+            snapshots.sort(key=lambda x: MONTH_INDEX.get(get_snap_date(x), 999))
             st.success("Snapshots reset.")
             st.rerun()
 
@@ -569,7 +572,7 @@ savings_rate_ytd = ((total_income - total_expenses) / total_income * 100) if tot
 # ── Investment P&L ──
 actual_snaps = sorted(
     [s for s in snapshots if s["official"] and s["us_equity"] > 0],
-    key=lambda x: MONTH_INDEX.get(x["snapshot_date"], 999),
+    key=lambda x: MONTH_INDEX.get(get_snap_date(x), 999),
 )
 latest_snap   = actual_snaps[-1] if actual_snaps else None
 latest_equity = latest_snap["us_equity"] if latest_snap else 0
@@ -796,8 +799,8 @@ with col_c:
     st.plotly_chart(fig3, use_container_width=True)
 
 with col_d:
-    snap_sorted   = sorted(snapshots, key=lambda x: MONTH_INDEX.get(x["snapshot_date"], 999))
-    actual_months = [s["date"]     for s in snap_sorted if s["us_equity"] > 0]
+    snap_sorted   = sorted(snapshots, key=lambda x: MONTH_INDEX.get(get_snap_date(x), 999))
+    actual_months = [get_snap_date(s)     for s in snap_sorted if s["us_equity"] > 0]
     actual_eq     = [s["us_equity"] for s in snap_sorted if s["us_equity"] > 0]
     actual_bd     = [s["bond_fund"] for s in snap_sorted if s["us_equity"] > 0]
 
@@ -856,7 +859,7 @@ with col_e:
 
 with col_f:
     if actual_snaps:
-        dates_a = [s["date"]      for s in actual_snaps]
+        dates_a = [get_snap_date(s)      for s in actual_snaps]
         eq_a    = [s["us_equity"]  for s in actual_snaps]
         bf_a    = [s["bond_fund"]  for s in actual_snaps]
         tot_a   = [e + b for e, b in zip(eq_a, bf_a)]
