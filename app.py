@@ -293,7 +293,7 @@ goals = load_goals()
 
 def load_snapshots():
     try:
-        rows = supabase.table("investment_snapshots").select("*").execute().data or []
+        rows = supabase.table("investment_snapshots_view").select("*").execute().data or []
     except Exception as e:
         st.error(f"Supabase load failed: {e}")
         rows = []
