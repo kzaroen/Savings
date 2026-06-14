@@ -490,7 +490,7 @@ with st.sidebar:
 
     with st.expander("Edit / Delete Snapshot", expanded=False):
         if snapshots:
-            snap_labels = [s["snapshot_date"] for s in snapshots]
+            snap_labels = [get_snap_date(s) for s in snapshots]
             edit_date   = st.selectbox("Select snapshot to edit", snap_labels, key="edit_select")
             edit_idx    = snap_labels.index(edit_date)
             s           = snapshots[edit_idx]
@@ -841,7 +841,7 @@ with col_e:
         bf_str = fmt_value(s["bond_fund"])
         tt_str = fmt_value(row_total) if row_total > 0 else '<span class="empty-val">Pending</span>'
         bi_str = fmt_value(s["bond_income"])
-        rows_html += f"<tr class='{row_cls}'><td>{s['date']}{badge}</td><td>{eq_str}</td><td>{bf_str}</td><td>{tt_str}</td><td class='{unreal_cls}'>{unreal_str}</td><td>{bi_str}</td></tr>"
+        rows_html += f"<tr class='{row_cls}'><td>{get_snap_date(s)}{badge}</td><td>{eq_str}</td><td>{bf_str}</td><td>{tt_str}</td><td class='{unreal_cls}'>{unreal_str}</td><td>{bi_str}</td></tr>"
 
     rows_html += f"<tr class='snap-total-row'><td>TOTAL BOND INCOME</td><td>—</td><td>—</td><td>—</td><td>—</td><td>₱{total_snap_income:.2f}</td></tr>"
     st.markdown(f"""
