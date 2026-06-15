@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 import random
-
+from datetime import datetime
 from supabase import create_client
 
 # ─── Supabase Connection ─────────────────────────────────────────────────────
@@ -56,13 +56,15 @@ st.markdown("""
   .goal-status-complete    { color:#2a7a5a; font-weight:600; }
 
   /* ── Milestone timeline ── */
-  .milestone-strip { display:flex; gap:12px; overflow-x:auto; padding:4px 2px 12px 2px; scrollbar-width:thin; }
-  .milestone-card { background:#fff; border:1px solid #E8D6CB; border-radius:12px; padding:14px 16px; min-width:180px; flex-shrink:0; box-shadow:0 2px 8px rgba(55,63,81,0.05); }
+  .milestone-strip{ display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:14px; margin-top:6px;}
+  .milestone-card{ background:#fff; border:1px solid #E8D6CB; border-radius:18px; padding:16px; min-height:140px; box-shadow:0 2px 8px rgba(55,63,81,0.05); transition:0.2s ease; }
   .milestone-icon { font-size:20px; margin-bottom:6px; }
   .milestone-date { color:#D0ADA7; font-size:10px; letter-spacing:1.2px; text-transform:uppercase; margin-bottom:4px; }
   .milestone-label { color:#373F51; font-family:'Lora',serif; font-size:12px; font-weight:600; line-height:1.4; }
   .milestone-past { border-left:3px solid #6EA4BF; }
   .milestone-future { border-left:3px solid #E8D6CB; opacity:0.7; }
+  .milestone-card:hover{ transform:translateY(-2px); }
+  
 
   /* ── Capital origin card ── */
   .capital-card { background:#fff; border:1px solid #E8D6CB; border-radius:14px; padding:20px 24px; box-shadow:0 2px 12px rgba(55,63,81,0.06); }
@@ -122,7 +124,7 @@ def base_layout(title="", h=340):
 MONTHS      = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 MONTH_INDEX = {m: i for i, m in enumerate(MONTHS)}
 
-# ── Capital origins (replaces raw COST_BASIS = 20000) ──
+# ── Capital origins ──
 CARRYOVER_2025 = {
     "total":      25400,
     "investment": 20000,
@@ -133,7 +135,7 @@ CARRYOVER_2025 = {
 COST_BASIS = CARRYOVER_2025["investment"]   # ← derived, not hardcoded
 
 # ── Fixed monthly schedules ──
-FIXED_INSURANCE   = [5400, 0, 0, 10800, 0, 0, 0, 0, 0, 5400, 0, 0]
+FIXED_INSURANCE   = [0, 0, 0, 10800, 0, 0, 0, 0, 0, 5400, 0, 0]
 FIXED_INVESTMENTS = [0,    0, 0, 0,     0, 15000, 0, 0, 0, 0, 0, 0]
 
 NOTES = [
@@ -165,7 +167,7 @@ PLANNED_INVESTMENT_PATH = {
     "Jun": {"equity": 20000, "bond": 15000},
 }
 
-SAVINGS_FLOOR = 2000  # monthly minimum buffer
+SAVINGS_FLOOR = 2000
 
 VERSES = [
     ("Proverbs 21:20 (KJV)", "There is treasure to be desired and oil in the dwelling of the wise; but a foolish man spendeth it up."),
@@ -257,7 +259,7 @@ def build_df():
         ins = FIXED_INSURANCE[i]
         inv = FIXED_INVESTMENTS[i]
 
-        net = inc - exp - inv - (ins if m != "Jan" else 0)
+        net = inc - exp - inv - ins
         cum += net
 
         rows.append({
@@ -595,6 +597,27 @@ bond_pct   = (latest_bond   / portfolio_val * 100) if portfolio_val else 0
 # Simple net worth estimate
 net_worth = portfolio_val + bond_income_ytd + end_cumulative
 
+# ── Wealth Growth Metrics ──────────────────────────────────────────
+
+STARTING_WEALTH = CARRYOVER_2025["investment"]
+
+wealth_growth_rate = (
+    (net_worth - STARTING_WEALTH) / STARTING_WEALTH * 100
+    if STARTING_WEALTH else 0
+)
+
+investment_growth_rate = (
+    (portfolio_val - total_cost_basis) / total_cost_basis * 100
+    if total_cost_basis else 0
+)
+
+net_worth_growth_rate = (
+    (net_worth - CARRYOVER_2025["total"]) / CARRYOVER_2025["total"] * 100
+    if CARRYOVER_2025["total"] else 0
+)
+
+growth_label = "kpi-pos" if wealth_growth_rate >= 0 else "kpi-neg"
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # PAGE HEADER
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -637,12 +660,13 @@ for col, label, val, sub, is_neg in kpis_t1:
 st.markdown("<br>", unsafe_allow_html=True)
 
 # KPI ROW — TIER 2: Wealth
-c6, c7, c8, c9 = st.columns(4)
+c6, c7, c8, c9, c10 = st.columns(5)
 kpis_t2 = [
     (c6, "Portfolio Value",    f"₱{portfolio_val:,.2f}"  if portfolio_val else "—",  "US Equity + Bond Fund",     False),
     (c7, "Unrealized G/L",    f"{'+'if unrealized_pnl>=0 else ''}₱{unrealized_pnl:,.2f}", "vs total cost basis", unrealized_pnl < 0),
     (c8, "Net P&L",           f"{'+'if net_pnl>=0 else ''}₱{net_pnl:,.2f}",         "incl. bond income",         net_pnl < 0),
     (c9, "Est. Net Worth",    f"₱{net_worth:,.0f}",                                  "Portfolio + savings",       False),
+    (c10, "Wealth Growth Rate",  f"{investment_growth_rate:.1f}%",  "Realized + unrealized portfolio growth", investment_growth_rate < 0)
 ]
 for col, label, val, sub, is_neg in kpis_t2:
     with col:
@@ -769,13 +793,22 @@ with col_a:
 
 with col_b:
     fig2 = go.Figure(go.Pie(
-        labels=["Savings Deposited", "Insurance", "Invested", "Money Spent"],
-        values=[total_income, sum(FIXED_INSURANCE), total_investments, total_expenses],
-        hole=0.55, marker_colors=["#6EA4BF", "#D0ADA7", "#0B3954", "#E8D6CB"],
-        textinfo="label+percent", textfont_size=11,
+        labels=["Savings Deposited", "Total Insurance Coverage", "Invested", "Money Spent"],
+        values=[
+            total_income,
+            sum(FIXED_INSURANCE) + CARRYOVER_2025["insurance"],
+            total_investments,
+            total_expenses
+        ],
+        hole=0.55,
+        marker_colors=["#6EA4BF", "#D0ADA7", "#0B3954", "#E8D6CB"],
+        textinfo="label+percent",
+        textfont_size=11,
     ))
+
     fig2.update_layout(**base_layout("Annual Allocation Breakdown", 340))
     fig2.update_layout(showlegend=False)
+
     st.plotly_chart(fig2, use_container_width=True)
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -921,7 +954,7 @@ tracker_df = pd.DataFrame([
         "Savings Deposited": income_map[m],
         "Money Spent": expenses_map[m],
         "Kept for Future": income_map[m] - expenses_map[m] - FIXED_INVESTMENTS[i]
-                           - (FIXED_INSURANCE[i] if m != "Jan" else 0),
+                           - FIXED_INSURANCE[i],
         "Notes": NOTES[i],
     }
     for i, m in enumerate(MONTHS)
@@ -966,8 +999,8 @@ with col_h:
     st.markdown(f'<div class="insight-neu">🌱 2025 carryover invested: <b>₱{cost_basis_2025:,.0f}</b></div>', unsafe_allow_html=True)
     if portfolio_val > 0:
         st.markdown(f'<div class="insight-neu">🥧 Allocation: <b>{equity_pct:.0f}% equity / {bond_pct:.0f}% bond</b></div>', unsafe_allow_html=True)
-        days_of_expenses = (bond_income_ytd / (total_expenses / 12)) if total_expenses > 0 else 0
-        st.markdown(f'<div class="insight-pos">📅 Bond income covers ~<b>{days_of_expenses:.1f} months</b> of avg expenses</div>', unsafe_allow_html=True)
+        months_of_expenses = (bond_income_ytd / (total_expenses / 12)) if total_expenses > 0 else 0
+        st.markdown(f'<div class="insight-pos">📅 Bond income covers ~<b>{months_of_expenses:.1f} months</b> of avg expenses</div>', unsafe_allow_html=True)
     st.markdown(f'<div class="insight-neu">💰 Net P&L: <b>{"+" if net_pnl >= 0 else ""}₱{net_pnl:,.2f}</b></div>', unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -992,4 +1025,8 @@ st.markdown(
     '<div style="text-align:center;color:#D0ADA7;font-size:11px;letter-spacing:1px;">'
     'Built by Kei · 2026 Financial Overview · Streamlit + Plotly + Supabase</div>',
     unsafe_allow_html=True,
+)
+
+st.caption(
+    f"Last updated: {datetime.now().strftime('%B %d, %Y • %I:%M %p')}"
 )
