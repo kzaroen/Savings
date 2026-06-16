@@ -156,7 +156,7 @@ MILESTONES = [
     {"date": "Jan 2026",  "label": "Started 2026 with ₱25,400 carryover",      "icon": "🌱", "past": True},
     {"date": "Feb 2026",  "label": "First official portfolio snapshot recorded", "icon": "📸", "past": True},
     {"date": "May 2026",  "label": "Portfolio crossed ₱20,000 mark",            "icon": "🌿", "past": True},
-    {"date": "Jun 2026",  "label": "First major reinvestment — ₱15,000",        "icon": "🚀", "past": False},
+    {"date": "Jun 2026",  "label": "First major reinvestment — ₱15,000",        "icon": "🚀", "past": True},
     {"date": "Sep 2026",  "label": "Turning 21 — credit card eligibility",      "icon": "🎂", "past": False},
     {"date": "Oct 2026",  "label": "Insurance month — plan ahead",              "icon": "🛡️", "past": False},
     {"date": "Dec 2026",  "label": "Year-end reinvestment + PERA planning",     "icon": "🏦", "past": False},
