@@ -12,8 +12,8 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # ─── Page Config ─────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="2026 Financial Overview",
-    page_icon="🌿",
+    page_title="2026 Flow of Tides",
+    page_icon="🌊",
     layout="wide",
     initial_sidebar_state="expanded",
 )

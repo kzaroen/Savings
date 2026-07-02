@@ -1,58 +1,74 @@
-# 🌿 2026 Savings Overview
+# 🌊 TIDES
 
-A personal financial command center built with Python, Streamlit, Plotly, and Pandas.
+A personal flow system built with Python, Streamlit, Plotly, and Pandas.
 
-This project was created as a long-term financial dashboard to track savings, investments, insurance planning, portfolio growth, and future financial goals in one interactive web application.
+TIDES is a reflective financial dashboard designed to visualize the movement of savings, investments, spending, and long-term financial growth over time.
 
-Designed for accessibility across devices through cloud deployment using Streamlit Community Cloud.
+Rather than treating finance as static numbers on a spreadsheet, TIDES focuses on patterns, flow, balance, and intentional decision-making through an interactive and accessible web application.
+
+Designed for cross-device accessibility through deployment on Streamlit Community Cloud.
 
 ---
 
 # ✨ Features
 
-## 💰 Savings & Cash Flow Tracking
+## 🌊 Flow Tracking
 
-* Monthly savings input system
-* Expense monitoring
-* Insurance payment tracking
-* Year-end cumulative savings projection
-* Monthly net cash flow analysis
+Monitor the movement of your finances through:
 
-## 📈 Investment Dashboard
+* savings tracking
+* cash inflow and outflow analysis
+* monthly balance monitoring
+* insurance payment records
+* cumulative yearly progress
+* net flow visualization
 
-* Portfolio allocation tracking
-* Investment growth visualization
-* Bond income monitoring
-* Unrealized gain/loss calculations
-* Net P&L tracking
-* Investment snapshots system
+---
 
-## 🎯 Goal Tracking
+## 📈 Investment Overview
 
-Track progress toward:
+Track portfolio activity and long-term growth through:
 
-* Emergency & insurance funds
-* Investment milestones
-* Retirement planning (P.E.R.A)
-* Personal financial goals
+* portfolio allocation monitoring
+* investment performance visualization
+* unrealized gain/loss tracking
+* net P&L calculations
+* bond income monitoring
+* investment snapshot logging
+
+---
+
+## 🎯 Long-Term Goals
+
+Track progress toward personal financial milestones including:
+
+* emergency reserves
+* insurance preparation
+* retirement contributions (P.E.R.A.)
+* investment targets
+* personal growth goals
+
+---
 
 ## 📊 Interactive Analytics
 
-Built with Plotly for:
+Powered by Plotly for dynamic visualizations including:
 
-* Cash flow charts
-* Portfolio growth graphs
-* Savings trend visualization
-* Investment breakdowns
-* Financial insights dashboard
+* flow analytics
+* portfolio growth charts
+* balance trends
+* investment breakdowns
+* long-term pattern insights
+
+---
 
 ## 🌿 Personalized Experience
 
-* Custom UI theme
-* Responsive dashboard layout
-* Dynamic KPI cards
-* Motivational and faith-centered reminders
-* Scripture rotation system inside sidebar
+* responsive dashboard layout
+* dynamic KPI cards
+* custom visual styling
+* reflective dashboard experience
+* motivational and faith-informed reminders
 
 ---
 
@@ -62,6 +78,7 @@ Built with Plotly for:
 * Streamlit
 * Plotly
 * Pandas
+* Supabase
 
 ---
 
@@ -70,24 +87,26 @@ Built with Plotly for:
 ## 1. Clone Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/Jehovah-Jireh.git
-cd Jehovah-Jireh
+git clone https://github.com/YOUR_USERNAME/tides-flow.git
+cd tides-flow
 ```
+
+---
 
 ## 2. Create Virtual Environment
 
 ### Windows
 
 ```bash
-python -m venv venv
-venv\Scripts\activate
+python -m venv .venv
+.venv\Scripts\activate
 ```
 
 ### macOS/Linux
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
 ---
@@ -106,7 +125,7 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-The dashboard will open at:
+The application will open at:
 
 ```text
 http://localhost:8501
@@ -116,12 +135,13 @@ http://localhost:8501
 
 # ☁️ Deployment
 
-This project is designed for deployment using:
+TIDES is designed for deployment using:
 
 * Streamlit Community Cloud
 * GitHub integration
+* Supabase backend services
 
-After deployment, the dashboard becomes accessible across:
+Accessible across:
 
 * desktop
 * laptop
@@ -133,40 +153,49 @@ After deployment, the dashboard becomes accessible across:
 # 📁 Project Structure
 
 ```text
-Jehovah-Jireh/
+tides/
 │
-├── app.py
-├── requirements.txt
-├── README.md
-└── venv/
+├── tides-flow/
+│   ├── app.py
+│   ├── requirements.txt
+│   └── README.md
+│
+└── .venv/
 ```
 
 ---
 
 # 🔮 Planned Features
 
-* User authentication
-* Cloud database integration
-* Mobile optimization
-* AI financial insights
-* Dividend forecasting
-* Automated savings analytics
-* Multi-year financial projections
+* authentication system
+* enhanced mobile responsiveness
+* AI-generated financial insights
+* automated savings analytics
+* dividend forecasting
+* multi-year flow projections
+* historical trend analysis
+* portfolio allocation intelligence
 
 ---
 
-# 🌱 Purpose
+# 🌊 Philosophy
 
-This dashboard was built not only to track money, but to encourage discipline, stewardship, long-term thinking, and intentional financial growth.
+TIDES was built as more than a financial tracker.
 
-The project reflects the belief that money is a tool to support:
+It is a system for observing patterns, maintaining clarity, and building intentional financial habits over time.
+
+The project reflects the idea that financial growth is not only about accumulation, but also about awareness, discipline, stability, and stewardship.
+
+Money is treated as a tool to support:
 
 * stability
 * generosity
-* future security
-* personal freedom
+* freedom
+* future opportunities
+* long-term peace of mind
 
 ---
 
 Built by Kei · 2026
-Streamlit + Plotly + Pandas
+
+Streamlit · Plotly · Pandas · Supabase
