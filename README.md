@@ -1,52 +1,84 @@
 # 🌊 TIDES
 
-A personal flow system built with Python, Streamlit, Plotly, and Pandas.
+A personal financial flow system built with **Python**, **Streamlit**, **Plotly**, **Pandas**, and **Supabase**.
 
-TIDES is a reflective financial dashboard designed to visualize the movement of savings, investments, spending, and long-term financial growth over time.
+TIDES is a multi-year personal finance dashboard designed to help visualize the movement of savings, investments, expenses, and long-term wealth over time.
 
-Rather than treating finance as static numbers on a spreadsheet, TIDES focuses on patterns, flow, balance, and intentional decision-making through an interactive and accessible web application.
+Rather than treating finance as static numbers in a spreadsheet, TIDES focuses on patterns, flow, stewardship, and intentional decision-making through an interactive web application that can be accessed anywhere.
 
-Designed for cross-device accessibility through deployment on Streamlit Community Cloud.
+Built for continuous financial tracking across multiple years and deployed using Streamlit Community Cloud.
 
 ---
 
 # ✨ Features
 
-## 🌊 Flow Tracking
+## 🗓 Multi-Year Financial Tracking
+
+Organize your finances by year while keeping historical records separate.
+
+Track independently for every year:
+
+* monthly savings
+* expenses
+* investments
+* portfolio snapshots
+* financial goals
+* yearly milestones
+
+Switch between years instantly without affecting historical data.
+
+---
+
+## 🌊 Cash Flow Tracking
 
 Monitor the movement of your finances through:
 
 * savings tracking
-* cash inflow and outflow analysis
-* monthly balance monitoring
-* insurance payment records
-* cumulative yearly progress
-* net flow visualization
+* monthly cash inflow and outflow
+* insurance payment schedules
+* investment contributions
+* cumulative balance monitoring
+* yearly net cash flow
 
 ---
 
-## 📈 Investment Overview
+## 📈 Investment Portfolio
 
-Track portfolio activity and long-term growth through:
+Track long-term investment performance with support for:
 
-* portfolio allocation monitoring
-* investment performance visualization
-* unrealized gain/loss tracking
-* net P&L calculations
-* bond income monitoring
-* investment snapshot logging
+* portfolio allocation
+* unrealized gain/loss
+* realized investment income
+* net P&L
+* bond income tracking
+* investment snapshots
+* cost basis calculations
 
 ---
 
-## 🎯 Long-Term Goals
+## 🏦 Retirement Tracking
 
-Track progress toward personal financial milestones including:
+Monitor retirement progress through Personal Equity and Retirement Account (P.E.R.A.) tracking.
 
-* emergency reserves
-* insurance preparation
-* retirement contributions (P.E.R.A.)
+Includes:
+
+* retirement balance
+* annual contributions
+* contribution progress
+* retirement savings separate from liquid net worth
+
+---
+
+## 🎯 Financial Goals
+
+Track progress toward long-term milestones including:
+
+* emergency funds
+* insurance reserves
+* retirement savings
 * investment targets
-* personal growth goals
+* personal purchases
+* custom yearly goals
 
 ---
 
@@ -54,46 +86,64 @@ Track progress toward personal financial milestones including:
 
 Powered by Plotly for dynamic visualizations including:
 
-* flow analytics
-* portfolio growth charts
-* balance trends
-* investment breakdowns
-* long-term pattern insights
+* yearly cash flow
+* cumulative savings
+* portfolio growth
+* asset allocation
+* financial trends
+* historical comparisons
 
 ---
 
-## 🌿 Personalized Experience
+## ☁️ Cloud Database
 
-* responsive dashboard layout
-* dynamic KPI cards
-* custom visual styling
-* reflective dashboard experience
-* motivational and faith-informed reminders
+Persistent financial records are stored using Supabase PostgreSQL.
+
+Features include:
+
+* cloud synchronization
+* year-isolated records
+* investment history
+* goal persistence
+* portfolio snapshots
 
 ---
 
-# 🛠️ Tech Stack
+## 🌿 Personalized Dashboard
 
-* Python
+Designed to provide a calm, reflective financial experience through:
+
+* responsive layout
+* custom KPI cards
+* personalized styling
+* yearly milestones
+* motivational reminders
+* faith-inspired stewardship verses
+
+---
+
+# 🛠 Tech Stack
+
+* Python 3.13
 * Streamlit
-* Plotly
+* Plotly Graph Objects
 * Pandas
-* Supabase
+* Supabase PostgreSQL
 
 ---
 
 # 🚀 Running Locally
 
-## 1. Clone Repository
+## 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/tides-flow.git
-cd tides-flow
+git clone https://github.com/kzaroen/tides.git
+cd tides
 ```
 
 ---
 
-## 2. Create Virtual Environment
+## 2. Create a virtual environment
 
 ### Windows
 
@@ -102,7 +152,7 @@ python -m venv .venv
 .venv\Scripts\activate
 ```
 
-### macOS/Linux
+### macOS / Linux
 
 ```bash
 python3 -m venv .venv
@@ -111,7 +161,7 @@ source .venv/bin/activate
 
 ---
 
-## 3. Install Dependencies
+## 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -119,13 +169,30 @@ pip install -r requirements.txt
 
 ---
 
-## 4. Run Streamlit App
+## 4. Configure Streamlit Secrets
+
+Create:
+
+```text
+.streamlit/secrets.toml
+```
+
+Add your Supabase credentials:
+
+```toml
+SUPABASE_URL="..."
+SUPABASE_KEY="..."
+```
+
+---
+
+## 5. Run the application
 
 ```bash
 streamlit run app.py
 ```
 
-The application will open at:
+The application will be available at:
 
 ```text
 http://localhost:8501
@@ -138,43 +205,70 @@ http://localhost:8501
 TIDES is designed for deployment using:
 
 * Streamlit Community Cloud
-* GitHub integration
-* Supabase backend services
+* GitHub
+* Supabase PostgreSQL
 
 Accessible across:
 
-* desktop
-* laptop
-* tablet
-* mobile devices
+* Desktop
+* Laptop
+* Tablet
+* Mobile devices
 
 ---
 
 # 📁 Project Structure
 
 ```text
-tides/
+tides-flow/
 │
-├── tides-flow/
-│   ├── app.py
-│   ├── requirements.txt
-│   └── README.md
+├── app.py
+├── requirements.txt
+├── README.md
+├── .gitignore
 │
-└── .venv/
+├── assets/
+│   └── styles.css
+│
+└── .streamlit/
+    └── secrets.toml
 ```
+
+> `.venv/` and `.streamlit/secrets.toml` are excluded from version control for security and local development.
 
 ---
 
-# 🔮 Planned Features
+# 🔮 Roadmap
 
-* authentication system
-* enhanced mobile responsiveness
-* AI-generated financial insights
-* automated savings analytics
+Future improvements include:
+
+* user authentication
+* enhanced mobile experience
+* AI-powered financial insights
+* cash flow forecasting
 * dividend forecasting
-* multi-year flow projections
-* historical trend analysis
+* multi-year wealth projections
+* historical trend comparisons
 * portfolio allocation intelligence
+* exportable yearly financial reports
+
+---
+
+# 🏗 Architecture
+
+TIDES uses a year-isolated architecture built on Supabase.
+
+Financial records are separated by year while sharing a common application interface.
+
+This allows:
+
+* scalable multi-year tracking
+* historical preservation
+* reusable yearly configurations
+* isolated financial goals
+* year-specific investment snapshots
+
+As each year begins, only configuration values need to be updated—no application logic has to be rewritten.
 
 ---
 
@@ -182,20 +276,36 @@ tides/
 
 TIDES was built as more than a financial tracker.
 
-It is a system for observing patterns, maintaining clarity, and building intentional financial habits over time.
+It is a system for observing financial patterns, building discipline, and making intentional decisions over time.
 
-The project reflects the idea that financial growth is not only about accumulation, but also about awareness, discipline, stability, and stewardship.
+Rather than pursuing perfectly linear growth, TIDES embraces the reality that personal finance moves in seasons.
 
-Money is treated as a tool to support:
-
-* stability
-* generosity
-* freedom
-* future opportunities
-* long-term peace of mind
+Money is viewed as a resource to be stewarded wisely—supporting stability, generosity, freedom, future opportunities, and long-term peace of mind.
 
 ---
 
-Built by Kei · 2026
+# 🌊 Why "TIDES"?
 
-Streamlit · Plotly · Pandas · Supabase
+Financial progress comes in waves.
+
+Some months emphasize saving.
+
+Others focus on investing, spending, or preparing for future obligations.
+
+Like the tides, progress is rarely perfectly linear—but with consistency and wise stewardship, every wave moves you forward.
+
+---
+
+## 📜 License
+
+This project is intended for personal learning and portfolio purposes.
+
+Feel free to explore the code and ideas for educational use.
+
+---
+
+🌊 **Built by Kei**
+
+**TIDES © 2026**
+
+*Powered by Streamlit • Plotly • Pandas • Supabase*

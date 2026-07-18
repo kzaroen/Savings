@@ -1,0 +1,77 @@
+  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+  html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; background-color: #f5ede8; }
+  .main { background: #f5ede8; }
+
+  /* ── KPI Cards ── */
+  .kpi-card { background:#fff; border:1px solid #E8D6CB; border-radius:14px; padding:20px 22px; text-align:center; box-shadow:0 2px 12px rgba(55,63,81,0.06); }
+  .kpi-label { color:#D0ADA7; font-size:10px; font-weight:500; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:6px; }
+  .kpi-value { color:#373F51; font-family:'Lora',serif; font-size:26px; font-weight:600; }
+  .kpi-sub   { color:#6EA4BF; font-size:11px; margin-top:4px; }
+  .kpi-neg   { color:#b05555; }
+  .kpi-pos   { color:#0B3954; }
+
+  /* ── Section headers ── */
+  .section-header { color:#0B3954; font-family:'Lora',serif; font-size:13px; font-weight:600; letter-spacing:2px; text-transform:uppercase; border-bottom:1.5px solid #E8D6CB; padding-bottom:8px; margin:28px 0 16px 0; }
+
+  /* ── Insight boxes ── */
+  .insight-pos { background:#f0f7fb; color:#0B3954; border:1px solid #6EA4BF; border-radius:8px; padding:10px 16px; margin:6px 0; font-size:13px; }
+  .insight-neg { background:#fdf3f0; color:#8c3a3a; border:1px solid #D0ADA7; border-radius:8px; padding:10px 16px; margin:6px 0; font-size:13px; }
+  .insight-neu { background:#f7f4f1; color:#373F51; border:1px solid #E8D6CB; border-radius:8px; padding:10px 16px; margin:6px 0; font-size:13px; }
+
+  /* ── Goal cards ── */
+  .goal-card { background:#fff; border:1px solid #E8D6CB; border-radius:14px; padding:18px 22px; margin-bottom:12px; box-shadow:0 2px 8px rgba(55,63,81,0.05); }
+  .goal-title { color:#373F51; font-family:'Lora',serif; font-size:14px; font-weight:600; }
+  .goal-meta  { color:#D0ADA7; font-size:11px; margin-top:2px; margin-bottom:10px; }
+  .goal-bar-bg { background:#E8D6CB; border-radius:99px; height:10px; width:100%; overflow:hidden; }
+  .goal-bar-fill { height:10px; border-radius:99px; background:linear-gradient(90deg,#6EA4BF,#0B3954); }
+  .goal-numbers { display:flex; justify-content:space-between; margin-top:6px; font-size:11px; color:#D0ADA7; }
+  .goal-pct { color:#0B3954; font-weight:600; font-size:13px; float:right; margin-top:-6px; }
+  .goal-status { font-size:10px; letter-spacing:1px; text-transform:uppercase; margin-top:8px; }
+  .goal-status-notstarted { color:#D0ADA7; }
+  .goal-status-inprogress { color:#6EA4BF; }
+  .goal-status-almosthere { color:#0B3954; font-weight:600; }
+  .goal-status-complete    { color:#2a7a5a; font-weight:600; }
+
+  /* ── Milestone timeline ── */
+  .milestone-strip{ display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:14px; margin-top:6px;}
+  .milestone-card{ background:#fff; border:1px solid #E8D6CB; border-radius:18px; padding:16px; min-height:140px; box-shadow:0 2px 8px rgba(55,63,81,0.05); transition:0.2s ease; }
+  .milestone-icon { font-size:20px; margin-bottom:6px; }
+  .milestone-date { color:#D0ADA7; font-size:10px; letter-spacing:1.2px; text-transform:uppercase; margin-bottom:4px; }
+  .milestone-label { color:#373F51; font-family:'Lora',serif; font-size:12px; font-weight:600; line-height:1.4; }
+  .milestone-past { border-left:3px solid #6EA4BF; }
+  .milestone-future { border-left:3px solid #E8D6CB; opacity:0.7; }
+  .milestone-card:hover{ transform:translateY(-2px); }
+  
+
+  /* ── Capital origin card ── */
+  .capital-card { background:#fff; border:1px solid #E8D6CB; border-radius:14px; padding:20px 24px; box-shadow:0 2px 12px rgba(55,63,81,0.06); }
+  .capital-row  { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #f0e8e2; font-size:13px; }
+  .capital-row:last-child { border-bottom:none; }
+  .capital-source { color:#D0ADA7; font-size:10px; letter-spacing:1px; text-transform:uppercase; }
+  .capital-amount { color:#0B3954; font-family:'Lora',serif; font-weight:600; font-size:15px; }
+  .capital-note { color:#D0ADA7; font-size:11px; }
+
+  /* ── Sidebar ── */
+  [data-testid="stSidebar"] { background:linear-gradient(135deg,#efe5df 0%,#E8D6CB 50%,#dcc9c2 100%); border-right:2px solid #D0ADA7; }
+  [data-testid="stSidebar"] > div { padding-top:8px; }
+  [data-testid="stSidebar"] label { color:#373F51 !important; font-size:12px !important; font-weight:500 !important; }
+  [data-testid="stSidebar"] .stButton > button { background:linear-gradient(135deg,#6EA4BF,#0B3954) !important; color:#fff !important; border:none !important; border-radius:8px !important; font-weight:500 !important; }
+
+  /* ── Tables ── */
+  .stDataFrame { border-radius:12px; overflow:hidden; }
+  .snap-table { width:100%; border-collapse:collapse; font-size:12px; font-family:'DM Sans',sans-serif; }
+  .snap-table th { background:#f0e8e2; color:#0B3954; font-size:10px; letter-spacing:1.2px; text-transform:uppercase; padding:10px 12px; text-align:left; border-bottom:1.5px solid #E8D6CB; }
+  .snap-table td { padding:9px 12px; border-bottom:1px solid #f0e8e2; color:#373F51; vertical-align:middle; }
+  .snap-table tr:last-child td { border-bottom:none; }
+  .snap-table tr:hover td { background:#faf5f2; }
+  .snap-official td { background:#f0f7fb !important; }
+  .snap-planned  td { background:#fdf8ef !important; }
+  .badge-planned  { background:rgba(110,164,191,0.18); color:#0B3954; font-size:9px; font-weight:600; padding:2px 7px; border-radius:99px; text-transform:uppercase; margin-left:5px; }
+  .badge-official { background:rgba(245,197,66,0.18); color:#9a7d0a; font-size:9px; font-weight:600; padding:2px 7px; border-radius:99px; text-transform:uppercase; margin-left:5px; }
+  .val-pos  { color:#2a7a5a; font-weight:500; }
+  .val-neg  { color:#b05555; font-weight:500; }
+  .val-zero { color:#ccc; }
+  .snap-total-row td { background:#f7f4f1; font-weight:600; color:#0B3954; border-top:1.5px solid #E8D6CB; }
+
+  /* ── Empty state ── */
+  .empty-val { color:#E8D6CB; font-size:10px; letter-spacing:1px; text-transform:uppercase; }
