@@ -157,6 +157,49 @@ with st.sidebar:
         index=AVAILABLE_YEARS.index(CURRENT_YEAR) if CURRENT_YEAR in AVAILABLE_YEARS else len(AVAILABLE_YEARS) - 1,
     )
 
+# ── Editor auth — anyone can view the dashboard, but the sidebar's edit
+#    forms only unlock after the correct password is entered. The password
+#    lives in st.secrets, never in code.
+#
+#    ⚠️ KNOWN LIMITATION — read before relying on this as real security:
+#    This is a client-side UI gate, not authentication or authorization.
+#    `st.session_state.is_editor` and each widget's `disabled=` flag control
+#    what renders and what a normal user can click — they do NOT stop a
+#    request from reaching save_monthly() / save_goal() / save_snapshot()
+#    at the data layer. There is no per-request identity check against
+#    Supabase, and no Row Level Security on the tables, so anything that
+#    calls those functions directly (bypassing the rendered UI) is not
+#    blocked by this gate.
+#
+#    Deliberately deferred for now (TIDES is a single-person tool with a
+#    low-value target and no public sign-up flow) in favor of shipping the
+#    multi-year architecture. Treat this as a soft deterrent against
+#    casual use — e.g. someone finding the link and poking at forms — not
+#    as protection against a determined attacker.
+#
+#    The real fix, when TIDES 3.0's multi-user phase happens: Supabase
+#    Auth + Row Level Security, so the database itself enforces who can
+#    write, independent of anything the Streamlit UI renders. ──
+if "is_editor" not in st.session_state:
+    st.session_state.is_editor = False
+
+with st.sidebar:
+    if st.session_state.is_editor:
+        st.success("🔓 Edit mode unlocked")
+        if st.button("Lock edit mode", use_container_width=True):
+            st.session_state.is_editor = False
+            st.rerun()
+    else:
+        with st.expander("🔒 Unlock edit mode"):
+            st.caption("Soft deterrent only — see code comments above for known limitations.")
+            pw_attempt = st.text_input("Password", type="password", key="edit_pw_attempt")
+            if st.button("Unlock", use_container_width=True):
+                if pw_attempt and pw_attempt == st.secrets.get("EDIT_PASSWORD"):
+                    st.session_state.is_editor = True
+                    st.rerun()
+                else:
+                    st.error("Incorrect password.")
+
 cfg = YEARLY_CONFIG[selected_year]
 CARRYOVER                = cfg["carryover"]
 COST_BASIS                = CARRYOVER["investment"]   # derived, not hardcoded
@@ -383,8 +426,11 @@ with st.sidebar:
                     value=goals.get(label, 0.0), step=step, format="%.0f",
                     key=f"goal_{label}_{selected_year}",
                     help=g["desc"],
+                    disabled=not st.session_state.is_editor,
                 )
-            if st.form_submit_button("Save Goals", use_container_width=True):
+            if not st.session_state.is_editor:
+                st.caption("🔒 Unlock edit mode to save changes")
+            if st.form_submit_button("Save Goals", use_container_width=True, disabled=not st.session_state.is_editor):
                 for g in GOALS_CONFIG:
                     new_val = st.session_state[f"goal_{g['label']}_{selected_year}"]
                     if new_val != goals[g["label"]]:
@@ -400,8 +446,11 @@ with st.sidebar:
             for m in MONTHS:
                 st.number_input(m, 0.0, 50000.0, income_map[m], 500.0,
                                 key=f"income_{m}_{selected_year}",
-                                help=f"Total cash you set aside in {m} {selected_year}")
-            if st.form_submit_button("Save Deposits", use_container_width=True):
+                                help=f"Total cash you set aside in {m} {selected_year}",
+                                disabled=not st.session_state.is_editor)
+            if not st.session_state.is_editor:
+                st.caption("🔒 Unlock edit mode to save changes")
+            if st.form_submit_button("Save Deposits", use_container_width=True, disabled=not st.session_state.is_editor):
                 for m in MONTHS:
                     new_inc = st.session_state[f"income_{m}_{selected_year}"]
                     if new_inc != income_map[m]:
@@ -417,8 +466,11 @@ with st.sidebar:
             for m in MONTHS:
                 st.number_input(m, 0.0, 50000.0, expenses_map[m], 500.0,
                                 key=f"expense_{m}_{selected_year}",
-                                help=f"Total spent in {m} {selected_year} (excluding insurance & investments)")
-            if st.form_submit_button("Save Expenses", use_container_width=True):
+                                help=f"Total spent in {m} {selected_year} (excluding insurance & investments)",
+                                disabled=not st.session_state.is_editor)
+            if not st.session_state.is_editor:
+                st.caption("🔒 Unlock edit mode to save changes")
+            if st.form_submit_button("Save Expenses", use_container_width=True, disabled=not st.session_state.is_editor):
                 for m in MONTHS:
                     new_exp = st.session_state[f"expense_{m}_{selected_year}"]
                     if new_exp != expenses_map[m]:
@@ -432,17 +484,22 @@ with st.sidebar:
     with st.expander("Add Snapshot", expanded=False):
         with st.form(f"add_snap_form_{selected_year}"):
             snap_date    = st.text_input("Month label (e.g. Jun)", key=f"snap_date_{selected_year}",
-                                         help="Use the 3-letter month abbreviation")
-            snap_equity  = st.number_input("US Equity Feeder (₱)",  0.0, value=0.0, step=10.0, format="%.2f", key=f"snap_eq_{selected_year}")
-            snap_bond    = st.number_input("Global Bond Fund (₱)",   0.0, value=0.0, step=10.0, format="%.2f", key=f"snap_bond_{selected_year}")
-            snap_bincome = st.number_input("Bond Income received (₱)", 0.0, value=0.0, step=1.0, format="%.2f", key=f"snap_bi_{selected_year}")
+                                         help="Use the 3-letter month abbreviation",
+                                         disabled=not st.session_state.is_editor)
+            snap_equity  = st.number_input("US Equity Feeder (₱)",  0.0, value=0.0, step=10.0, format="%.2f", key=f"snap_eq_{selected_year}", disabled=not st.session_state.is_editor)
+            snap_bond    = st.number_input("Global Bond Fund (₱)",   0.0, value=0.0, step=10.0, format="%.2f", key=f"snap_bond_{selected_year}", disabled=not st.session_state.is_editor)
+            snap_bincome = st.number_input("Bond Income received (₱)", 0.0, value=0.0, step=1.0, format="%.2f", key=f"snap_bi_{selected_year}", disabled=not st.session_state.is_editor)
             snap_pera_bal = st.number_input("PERA Balance (₱)", 0.0, value=0.0, step=10.0, format="%.2f", key=f"snap_pera_bal_{selected_year}",
-                                            help="Total PERA account value as of this snapshot")
+                                            help="Total PERA account value as of this snapshot",
+                                            disabled=not st.session_state.is_editor)
             snap_pera_ctr = st.number_input("PERA Contribution this snapshot (₱)", 0.0, value=0.0, step=100.0, format="%.2f", key=f"snap_pera_ctr_{selected_year}",
-                                            help="New money put into PERA since your last snapshot")
-            snap_official = st.checkbox("✦ Mark as Official (verified from BPI app)", key=f"snap_official_{selected_year}")
-            snap_planned  = st.checkbox("⏳ Mark as Planned (future projection)",     key=f"snap_planned_{selected_year}")
-            if st.form_submit_button("Add Snapshot", use_container_width=True):
+                                            help="New money put into PERA since your last snapshot",
+                                            disabled=not st.session_state.is_editor)
+            snap_official = st.checkbox("✦ Mark as Official (verified from BPI app)", key=f"snap_official_{selected_year}", disabled=not st.session_state.is_editor)
+            snap_planned  = st.checkbox("⏳ Mark as Planned (future projection)",     key=f"snap_planned_{selected_year}", disabled=not st.session_state.is_editor)
+            if not st.session_state.is_editor:
+                st.caption("🔒 Unlock edit mode to save changes")
+            if st.form_submit_button("Add Snapshot", use_container_width=True, disabled=not st.session_state.is_editor):
                 if snap_date:
                     new_snap = {
                         "date": snap_date, "us_equity": snap_equity,
@@ -467,18 +524,20 @@ with st.sidebar:
             edit_idx    = snap_labels.index(edit_date)
             s           = snapshots[edit_idx]
             with st.form(f"edit_snap_form_{selected_year}"):
-                e_eq  = st.number_input("US Equity (₱)",    value=float(s["us_equity"]),   step=10.0, format="%.2f", key=f"e_eq_{selected_year}")
-                e_bf  = st.number_input("Bond Fund (₱)",    value=float(s["bond_fund"]),   step=10.0, format="%.2f", key=f"e_bf_{selected_year}")
-                e_bi  = st.number_input("Bond Income (₱)",  value=float(s["bond_income"]), step=1.0,  format="%.2f", key=f"e_bi_{selected_year}")
-                e_pb  = st.number_input("PERA Balance (₱)", value=float(s.get("pera_balance", 0.0)), step=10.0, format="%.2f", key=f"e_pb_{selected_year}")
-                e_pc  = st.number_input("PERA Contribution (₱)", value=float(s.get("pera_contributions", 0.0)), step=100.0, format="%.2f", key=f"e_pc_{selected_year}")
-                e_off = st.checkbox("✦ Official", value=s["official"], key=f"e_official_{selected_year}")
-                e_pln = st.checkbox("⏳ Planned",  value=s["planned"],  key=f"e_planned_{selected_year}")
+                e_eq  = st.number_input("US Equity (₱)",    value=float(s["us_equity"]),   step=10.0, format="%.2f", key=f"e_eq_{selected_year}", disabled=not st.session_state.is_editor)
+                e_bf  = st.number_input("Bond Fund (₱)",    value=float(s["bond_fund"]),   step=10.0, format="%.2f", key=f"e_bf_{selected_year}", disabled=not st.session_state.is_editor)
+                e_bi  = st.number_input("Bond Income (₱)",  value=float(s["bond_income"]), step=1.0,  format="%.2f", key=f"e_bi_{selected_year}", disabled=not st.session_state.is_editor)
+                e_pb  = st.number_input("PERA Balance (₱)", value=float(s.get("pera_balance", 0.0)), step=10.0, format="%.2f", key=f"e_pb_{selected_year}", disabled=not st.session_state.is_editor)
+                e_pc  = st.number_input("PERA Contribution (₱)", value=float(s.get("pera_contributions", 0.0)), step=100.0, format="%.2f", key=f"e_pc_{selected_year}", disabled=not st.session_state.is_editor)
+                e_off = st.checkbox("✦ Official", value=s["official"], key=f"e_official_{selected_year}", disabled=not st.session_state.is_editor)
+                e_pln = st.checkbox("⏳ Planned",  value=s["planned"],  key=f"e_planned_{selected_year}", disabled=not st.session_state.is_editor)
+                if not st.session_state.is_editor:
+                    st.caption("🔒 Unlock edit mode to save changes")
                 col1, col2 = st.columns(2)
                 with col1:
-                    save_btn = st.form_submit_button("Save", use_container_width=True)
+                    save_btn = st.form_submit_button("Save", use_container_width=True, disabled=not st.session_state.is_editor)
                 with col2:
-                    del_btn = st.form_submit_button("Delete", use_container_width=True)
+                    del_btn = st.form_submit_button("Delete", use_container_width=True, disabled=not st.session_state.is_editor)
 
             if save_btn:
                 updated = {"date": edit_date, "us_equity": e_eq, "bond_fund": e_bf,
@@ -495,7 +554,9 @@ with st.sidebar:
                 st.success(f"Deleted: {edit_date}")
                 st.rerun()
 
-        if st.button("↺ Reset All Snapshots to Defaults", use_container_width=True, key=f"reset_snaps_{selected_year}"):
+        if not st.session_state.is_editor:
+            st.caption("🔒 Unlock edit mode to reset snapshots")
+        if st.button("↺ Reset All Snapshots to Defaults", use_container_width=True, key=f"reset_snaps_{selected_year}", disabled=not st.session_state.is_editor):
             reset_snapshots_in_db(selected_year)
             snapshots = [s.copy() for s in INITIAL_SNAPSHOTS]
             snapshots.sort(key=lambda x: MONTH_INDEX.get(get_snap_date(x), 999))
