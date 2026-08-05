@@ -26,7 +26,17 @@ supabase = create_client(
 
 css = Path("assets/styles.css").read_text()
 st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
-
+st.html("""
+<div style="
+    padding: 20px;
+    background: #0B3954;
+    color: white;
+    border-radius: 12px;
+    font-size: 20px;
+">
+    🌊 HTML TEST — THIS SHOULD BE A BLUE CARD
+</div>
+""")
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # THEME
