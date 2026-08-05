@@ -157,6 +157,49 @@ with st.sidebar:
         index=AVAILABLE_YEARS.index(CURRENT_YEAR) if CURRENT_YEAR in AVAILABLE_YEARS else len(AVAILABLE_YEARS) - 1,
     )
 
+# ── Editor auth — anyone can view the dashboard, but the sidebar's edit
+#    forms only unlock after the correct password is entered. The password
+#    lives in st.secrets, never in code.
+#
+#    ⚠️ KNOWN LIMITATION — read before relying on this as real security:
+#    This is a client-side UI gate, not authentication or authorization.
+#    `st.session_state.is_editor` and each widget's `disabled=` flag control
+#    what renders and what a normal user can click — they do NOT stop a
+#    request from reaching save_monthly() / save_goal() / save_snapshot()
+#    at the data layer. There is no per-request identity check against
+#    Supabase, and no Row Level Security on the tables, so anything that
+#    calls those functions directly (bypassing the rendered UI) is not
+#    blocked by this gate.
+#
+#    Deliberately deferred for now (TIDES is a single-person tool with a
+#    low-value target and no public sign-up flow) in favor of shipping the
+#    multi-year architecture. Treat this as a soft deterrent against
+#    casual use — e.g. someone finding the link and poking at forms — not
+#    as protection against a determined attacker.
+#
+#    The real fix, when TIDES 3.0's multi-user phase happens: Supabase
+#    Auth + Row Level Security, so the database itself enforces who can
+#    write, independent of anything the Streamlit UI renders. ──
+if "is_editor" not in st.session_state:
+    st.session_state.is_editor = False
+
+with st.sidebar:
+    if st.session_state.is_editor:
+        st.success("🔓 Edit mode unlocked")
+        if st.button("Lock edit mode", use_container_width=True):
+            st.session_state.is_editor = False
+            st.rerun()
+    else:
+        with st.expander("🔒 Unlock edit mode"):
+            st.caption("Soft deterrent only — see code comments above for known limitations.")
+            pw_attempt = st.text_input("Password", type="password", key="edit_pw_attempt")
+            if st.button("Unlock", use_container_width=True):
+                if pw_attempt and pw_attempt == st.secrets.get("EDIT_PASSWORD"):
+                    st.session_state.is_editor = True
+                    st.rerun()
+                else:
+                    st.error("Incorrect password.")
+
 cfg = YEARLY_CONFIG[selected_year]
 CARRYOVER                = cfg["carryover"]
 COST_BASIS                = CARRYOVER["investment"]   # derived, not hardcoded
