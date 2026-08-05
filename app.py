@@ -1,4 +1,5 @@
 import random
+import textwrap
 from datetime import datetime
 from pathlib import Path
 
@@ -444,6 +445,13 @@ def fmt_value(value, prefix="₱", decimals=2):
         return '<span class="empty-val">Pending</span>'
 
     return f"{prefix}{value:,.{decimals}f}"
+
+
+def render_html(html: str):
+    st.markdown(
+        textwrap.dedent(html),
+        unsafe_allow_html=True,
+    )
 
 
 def goal_status_label(percent):
@@ -1389,7 +1397,7 @@ kpis = [
 
 for column, label, value, subtitle, is_negative in kpis:
     with column:
-        st.markdown(
+        render_html(
             f"""
             <div class="kpi-card">
                 <div class="kpi-label">{label}</div>
@@ -1398,11 +1406,8 @@ for column, label, value, subtitle, is_negative in kpis:
                 </div>
                 <div class="kpi-sub">{subtitle}</div>
             </div>
-            """,
-            unsafe_allow_html=True
+            """
         )
-        
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # KPI — WEALTH
@@ -1454,7 +1459,7 @@ wealth_kpis = [
 
 for column, label, value, subtitle, is_negative in wealth_kpis:
     with column:
-        st.markdown(
+        render_html(
             f"""
             <div class="kpi-card">
                 <div class="kpi-label">{label}</div>
@@ -1463,8 +1468,7 @@ for column, label, value, subtitle, is_negative in wealth_kpis:
                 </div>
                 <div class="kpi-sub">{subtitle}</div>
             </div>
-            """,
-            unsafe_allow_html=True
+            """
         )
 
 
@@ -1480,7 +1484,7 @@ st.markdown(
 p1, p2, p3 = st.columns(3)
 
 with p1:
-    st.markdown(
+    render_html(
         f"""
         <div class="kpi-card">
             <div class="kpi-label">PERA Balance</div>
@@ -1491,12 +1495,11 @@ with p1:
                 Locked until retirement — tracked separately from net worth
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
 with p2:
-    st.markdown(
+    render_html(
         f"""
         <div class="kpi-card">
             <div class="kpi-label">Contributions This Year</div>
@@ -1507,12 +1510,11 @@ with p2:
                 {pera_cap_pct:.0f}% of ₱{PERA_CONTRIBUTION_CAP:,} annual cap
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
 with p3:
-    st.markdown(
+    render_html(
         f"""
         <div class="kpi-card" style="text-align:left;">
             <div class="kpi-label" style="text-align:center;">
@@ -1529,8 +1531,7 @@ with p3:
                 <span>₱{PERA_CONTRIBUTION_CAP:,.0f}</span>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True
+        """
     )
 
 
@@ -1558,7 +1559,7 @@ with col_origin:
         else 0
     )
 
-    st.markdown(
+    render_html(
         f"""
         <div class="capital-card">
             <div class="kpi-label" style="margin-bottom:12px;">
@@ -1651,8 +1652,7 @@ with col_origin:
                 </div>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
     
 
@@ -1715,7 +1715,7 @@ for index, goal in enumerate(GOALS_CONFIG):
     status_key, status_text = goal_status_label(percent)
 
     with goal_columns[index]:
-        st.markdown(
+        render_html(
             f"""
             <div class="goal-card">
                 <div class="goal-title">
@@ -1744,8 +1744,7 @@ for index, goal in enumerate(GOALS_CONFIG):
                     {status_text}
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True
+            """
         )
 
 
