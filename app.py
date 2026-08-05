@@ -26,17 +26,6 @@ supabase = create_client(
 
 css = Path("assets/styles.css").read_text()
 st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
-st.html("""
-<div style="
-    padding: 20px;
-    background: #0B3954;
-    color: white;
-    border-radius: 12px;
-    font-size: 20px;
-">
-    🌊 HTML TEST — THIS SHOULD BE A BLUE CARD
-</div>
-""")
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # THEME
@@ -1400,7 +1389,7 @@ kpis = [
 
 for column, label, value, subtitle, is_negative in kpis:
     with column:
-        st.html(
+        st.markdown(
             f"""
             <div class="kpi-card">
                 <div class="kpi-label">{label}</div>
@@ -1410,9 +1399,9 @@ for column, label, value, subtitle, is_negative in kpis:
                 <div class="kpi-sub">{subtitle}</div>
             </div>
             """
+            unsafe_allow_html=True
         )
         
-st.markdown("<br>", unsafe_allow_html=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1465,7 +1454,7 @@ wealth_kpis = [
 
 for column, label, value, subtitle, is_negative in wealth_kpis:
     with column:
-        st.html(
+        st.markdown(
             f"""
             <div class="kpi-card">
                 <div class="kpi-label">{label}</div>
@@ -1475,6 +1464,7 @@ for column, label, value, subtitle, is_negative in wealth_kpis:
                 <div class="kpi-sub">{subtitle}</div>
             </div>
             """
+            unsafe_allow_html=True
         )
 
 
@@ -1522,7 +1512,7 @@ with p2:
     )
 
 with p3:
-    st.html(
+    st.markdown(
         f"""
         <div class="kpi-card" style="text-align:left;">
             <div class="kpi-label" style="text-align:center;">
@@ -1540,6 +1530,7 @@ with p3:
             </div>
         </div>
         """
+        unsafe_allow_html=True
     )
 
 
@@ -1567,7 +1558,7 @@ with col_origin:
         else 0
     )
 
-    st.html(
+    st.markdown(
         f"""
         <div class="capital-card">
             <div class="kpi-label" style="margin-bottom:12px;">
@@ -1661,6 +1652,7 @@ with col_origin:
             </div>
         </div>
         """
+        unsafe_allow_html=True
     )
 
 with col_milestones:
@@ -1688,8 +1680,9 @@ with col_milestones:
             </div>
             """
 
-        st.html(
-            f'<div class="milestone-strip">{cards}</div>'
+        st.markdown(
+            f'<div class="milestone-strip">{cards}</div>',
+            unsafe_allow_html=True
         )
     else:
         st.info(
@@ -1721,7 +1714,7 @@ for index, goal in enumerate(GOALS_CONFIG):
     status_key, status_text = goal_status_label(percent)
 
     with goal_columns[index]:
-        st.html(
+        st.markdown(
             f"""
             <div class="goal-card">
                 <div class="goal-title">
@@ -1750,7 +1743,8 @@ for index, goal in enumerate(GOALS_CONFIG):
                     {status_text}
                 </div>
             </div>
-            """
+            """,
+            unsafe_allow_html=True
         )
 
 
