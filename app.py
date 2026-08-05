@@ -1398,7 +1398,7 @@ for column, label, value, subtitle, is_negative in kpis:
                 </div>
                 <div class="kpi-sub">{subtitle}</div>
             </div>
-            """
+            """,
             unsafe_allow_html=True
         )
         
@@ -1463,7 +1463,7 @@ for column, label, value, subtitle, is_negative in wealth_kpis:
                 </div>
                 <div class="kpi-sub">{subtitle}</div>
             </div>
-            """
+            """,
             unsafe_allow_html=True
         )
 
@@ -1529,7 +1529,7 @@ with p3:
                 <span>₱{PERA_CONTRIBUTION_CAP:,.0f}</span>
             </div>
         </div>
-        """
+        """,
         unsafe_allow_html=True
     )
 
@@ -1651,9 +1651,10 @@ with col_origin:
                 </div>
             </div>
         </div>
-        """
-        unsafe_allow_html=True
+        """,
+        unsafe_allow_html=True,
     )
+    
 
 with col_milestones:
     if MILESTONES:
