@@ -1322,7 +1322,7 @@ st.markdown(
             font-size:24px;
             font-weight:600;
         ">
-            {selected_year} Financial Overview
+            {selected_year} Flow of Tides
         </span>
     </div>
     """,
@@ -1658,6 +1658,7 @@ with col_origin:
 
 with col_milestones:
     if MILESTONES:
+
         cards = ""
 
         for milestone in MILESTONES:
@@ -1670,25 +1671,29 @@ with col_milestones:
             cards += f"""
             <div class="milestone-card {status_class}">
                 <div class="milestone-icon">
-                    {milestone['icon']}
+                    {milestone["icon"]}
                 </div>
+
                 <div class="milestone-date">
-                    {milestone['date']}
+                    {milestone["date"]}
                 </div>
+
                 <div class="milestone-label">
-                    {milestone['label']}
+                    {milestone["label"]}
                 </div>
             </div>
             """
 
-        st.markdown(
-            f'<div class="milestone-strip">{cards}</div>',
-            unsafe_allow_html=True
+        render_html(
+            f"""
+            <div class="milestone-strip">
+                {cards}
+            </div>
+            """
         )
+
     else:
-        st.info(
-            f"No milestones logged for {selected_year} yet."
-        )
+        st.info(f"No milestones logged for {selected_year} yet.")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1703,6 +1708,7 @@ st.markdown(
 goal_columns = st.columns(len(GOALS_CONFIG))
 
 for index, goal in enumerate(GOALS_CONFIG):
+
     current_value = goals.get(goal["label"], 0)
     target_value = goal["target"]
 
@@ -1715,9 +1721,11 @@ for index, goal in enumerate(GOALS_CONFIG):
     status_key, status_text = goal_status_label(percent)
 
     with goal_columns[index]:
+
         render_html(
             f"""
             <div class="goal-card">
+
                 <div class="goal-title">
                     {goal['icon']} {goal['label']}
                 </div>
@@ -1731,8 +1739,10 @@ for index, goal in enumerate(GOALS_CONFIG):
                 </span>
 
                 <div class="goal-bar-bg">
-                    <div class="goal-bar-fill"
-                        style="width:{percent:.1f}%;"></div>
+                    <div
+                        class="goal-bar-fill"
+                        style="width:{percent:.1f}%;">
+                    </div>
                 </div>
 
                 <div class="goal-numbers">
@@ -1743,6 +1753,7 @@ for index, goal in enumerate(GOALS_CONFIG):
                 <div class="goal-status goal-status-{status_key}">
                     {status_text}
                 </div>
+
             </div>
             """
         )
