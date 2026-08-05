@@ -1400,19 +1400,18 @@ kpis = [
 
 for column, label, value, subtitle, is_negative in kpis:
     with column:
-        st.markdown(
+        st.html(
             f"""
             <div class="kpi-card">
                 <div class="kpi-label">{label}</div>
-                <div class="kpi-value {
-                    'kpi-neg' if is_negative else 'kpi-pos'
-                }">{value}</div>
+                <div class="kpi-value {'kpi-neg' if is_negative else 'kpi-pos'}">
+                    {value}
+                </div>
                 <div class="kpi-sub">{subtitle}</div>
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
-
+        
 st.markdown("<br>", unsafe_allow_html=True)
 
 
@@ -1466,17 +1465,16 @@ wealth_kpis = [
 
 for column, label, value, subtitle, is_negative in wealth_kpis:
     with column:
-        st.markdown(
+        st.html(
             f"""
             <div class="kpi-card">
                 <div class="kpi-label">{label}</div>
-                <div class="kpi-value {
-                    'kpi-neg' if is_negative else 'kpi-pos'
-                }">{value}</div>
+                <div class="kpi-value {'kpi-neg' if is_negative else 'kpi-pos'}">
+                    {value}
+                </div>
                 <div class="kpi-sub">{subtitle}</div>
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
 
 
