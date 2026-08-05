@@ -1722,10 +1722,9 @@ for index, goal in enumerate(GOALS_CONFIG):
 
     with goal_columns[index]:
 
-        render_html(
+        st.markdown(
             f"""
             <div class="goal-card">
-
                 <div class="goal-title">
                     {goal['icon']} {goal['label']}
                 </div>
@@ -1739,10 +1738,8 @@ for index, goal in enumerate(GOALS_CONFIG):
                 </span>
 
                 <div class="goal-bar-bg">
-                    <div
-                        class="goal-bar-fill"
-                        style="width:{percent:.1f}%;">
-                    </div>
+                    <div class="goal-bar-fill"
+                        style="width:{percent:.1f}%;"></div>
                 </div>
 
                 <div class="goal-numbers">
@@ -1753,9 +1750,9 @@ for index, goal in enumerate(GOALS_CONFIG):
                 <div class="goal-status goal-status-{status_key}">
                     {status_text}
                 </div>
-
             </div>
-            """
+            """,
+            unsafe_allow_html=True,
         )
 
 
@@ -2333,58 +2330,42 @@ with col_f:
             use_container_width=True,
         )
 
-    st.markdown(
-        f"""
-        <div style="
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:10px;
-            margin-top:8px;
-        ">
-            <div class="kpi-card" style="padding:14px 12px;">
-                <div class="kpi-label">
-                    Unrealized G/L
+        unrealized_class = "kpi-neg" if unrealized_pnl < 0 else "kpi-pos"
+        unrealized_sign = "+" if unrealized_pnl >= 0 else ""
+
+        net_class = "kpi-neg" if net_pnl < 0 else "kpi-pos"
+        net_sign = "+" if net_pnl >= 0 else ""
+
+        st.markdown(
+            f"""
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;">
+                <div class="kpi-card" style="padding:14px 12px;">
+                    <div class="kpi-label">Unrealized G/L</div>
+
+                    <div class="kpi-value {unrealized_class}" style="font-size:20px;">
+                        {unrealized_sign}₱{unrealized_pnl:,.2f}
+                    </div>
+
+                    <div class="kpi-sub">
+                        vs ₱{total_cost_basis:,} basis
+                    </div>
                 </div>
 
-                <div class="kpi-value {
-                    'kpi-neg'
-                    if unrealized_pnl < 0
-                    else 'kpi-pos'
-                }" style="font-size:20px;">
-                    {
-                        '+' if unrealized_pnl >= 0 else ''
-                    }₱{unrealized_pnl:,.2f}
-                </div>
+                <div class="kpi-card" style="padding:14px 12px;">
+                    <div class="kpi-label">Net P&L</div>
 
-                <div class="kpi-sub">
-                    vs ₱{total_cost_basis:,} basis
-                </div>
-            </div>
+                    <div class="kpi-value {net_class}" style="font-size:20px;">
+                        {net_sign}₱{net_pnl:,.2f}
+                    </div>
 
-            <div class="kpi-card" style="padding:14px 12px;">
-                <div class="kpi-label">
-                    Net P&L
-                </div>
-
-                <div class="kpi-value {
-                    'kpi-neg'
-                    if net_pnl < 0
-                    else 'kpi-pos'
-                }" style="font-size:20px;">
-                    {
-                        '+' if net_pnl >= 0 else ''
-                    }₱{net_pnl:,.2f}
-                </div>
-
-                <div class="kpi-sub">
-                    unrealized + bond income
+                    <div class="kpi-sub">
+                        unrealized + bond income
+                    </div>
                 </div>
             </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
+            """,
+            unsafe_allow_html=True,
+        )
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # MONTHLY TRACKER
