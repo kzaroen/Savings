@@ -1522,7 +1522,7 @@ with p2:
     )
 
 with p3:
-    st.markdown(
+    st.html(
         f"""
         <div class="kpi-card" style="text-align:left;">
             <div class="kpi-label" style="text-align:center;">
@@ -1531,7 +1531,7 @@ with p3:
 
             <div class="goal-bar-bg" style="margin-top:10px;">
                 <div class="goal-bar-fill"
-                     style="width:{pera_cap_pct:.1f}%;"></div>
+                    style="width:{pera_cap_pct:.1f}%;"></div>
             </div>
 
             <div class="goal-numbers">
@@ -1539,8 +1539,7 @@ with p3:
                 <span>₱{PERA_CONTRIBUTION_CAP:,.0f}</span>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
 
@@ -1568,7 +1567,7 @@ with col_origin:
         else 0
     )
 
-    st.markdown(
+    st.html(
         f"""
         <div class="capital-card">
             <div class="kpi-label" style="margin-bottom:12px;">
@@ -1661,8 +1660,7 @@ with col_origin:
                 </div>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
 with col_milestones:
@@ -1690,9 +1688,8 @@ with col_milestones:
             </div>
             """
 
-        st.markdown(
-            f'<div class="milestone-strip">{cards}</div>',
-            unsafe_allow_html=True,
+        st.html(
+            f'<div class="milestone-strip">{cards}</div>'
         )
     else:
         st.info(
@@ -1724,7 +1721,7 @@ for index, goal in enumerate(GOALS_CONFIG):
     status_key, status_text = goal_status_label(percent)
 
     with goal_columns[index]:
-        st.markdown(
+        st.html(
             f"""
             <div class="goal-card">
                 <div class="goal-title">
@@ -1741,7 +1738,7 @@ for index, goal in enumerate(GOALS_CONFIG):
 
                 <div class="goal-bar-bg">
                     <div class="goal-bar-fill"
-                         style="width:{percent:.1f}%;"></div>
+                        style="width:{percent:.1f}%;"></div>
                 </div>
 
                 <div class="goal-numbers">
@@ -1753,8 +1750,7 @@ for index, goal in enumerate(GOALS_CONFIG):
                     {status_text}
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
 
 
