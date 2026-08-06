@@ -638,33 +638,6 @@ for col, label, val, sub, is_neg in kpis_t2:
           <div class="kpi-sub">{sub}</div>
         </div>""", unsafe_allow_html=True)
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# PERA — RETIREMENT TRACKING
-# ═══════════════════════════════════════════════════════════════════════════════
-
-st.markdown('<div class="section-header">🏦 P.E.R.A — Retirement Tracking</div>', unsafe_allow_html=True)
-p1, p2, p3 = st.columns(3)
-with p1:
-    st.markdown(f"""
-    <div class="kpi-card">
-      <div class="kpi-label">PERA Balance</div>
-      <div class="kpi-value kpi-pos">{fmt_value(latest_pera_balance)}</div>
-      <div class="kpi-sub">Locked until retirement — tracked separately from net worth</div>
-    </div>""", unsafe_allow_html=True)
-with p2:
-    st.markdown(f"""
-    <div class="kpi-card">
-      <div class="kpi-label">Contributions This Year</div>
-      <div class="kpi-value kpi-pos">{fmt_value(pera_contributions_ytd)}</div>
-      <div class="kpi-sub">{pera_cap_pct:.0f}% of ₱{PERA_CONTRIBUTION_CAP:,} annual cap</div>
-    </div>""", unsafe_allow_html=True)
-with p3:
-    st.markdown(f"""
-    <div class="kpi-card" style="text-align:left;">
-      <div class="kpi-label" style="text-align:center;">Cap Progress</div>
-      <div class="goal-bar-bg" style="margin-top:10px;"><div class="goal-bar-fill" style="width:{pera_cap_pct:.1f}%;"></div></div>
-      <div class="goal-numbers"><span>₱{pera_contributions_ytd:,.0f}</span><span>₱{PERA_CONTRIBUTION_CAP:,.0f}</span></div>
-    </div>""", unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # CAPITAL ORIGIN + MILESTONE STRIP
@@ -968,6 +941,34 @@ st.dataframe(
     tracker_df.style.apply(highlight_negative, axis=1),
     use_container_width=True, hide_index=True, height=460,
 )
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PERA — RETIREMENT TRACKING
+# ═══════════════════════════════════════════════════════════════════════════════
+
+st.markdown('<div class="section-header">🏦 P.E.R.A — Retirement Tracking</div>', unsafe_allow_html=True)
+p1, p2, p3 = st.columns(3)
+with p1:
+    st.markdown(f"""
+    <div class="kpi-card">
+      <div class="kpi-label">PERA Balance</div>
+      <div class="kpi-value kpi-pos">{fmt_value(latest_pera_balance)}</div>
+      <div class="kpi-sub">Locked until retirement — tracked separately from net worth</div>
+    </div>""", unsafe_allow_html=True)
+with p2:
+    st.markdown(f"""
+    <div class="kpi-card">
+      <div class="kpi-label">Contributions This Year</div>
+      <div class="kpi-value kpi-pos">{fmt_value(pera_contributions_ytd)}</div>
+      <div class="kpi-sub">{pera_cap_pct:.0f}% of ₱{PERA_CONTRIBUTION_CAP:,} annual cap</div>
+    </div>""", unsafe_allow_html=True)
+with p3:
+    st.markdown(f"""
+    <div class="kpi-card" style="text-align:left;">
+      <div class="kpi-label" style="text-align:center;">Cap Progress</div>
+      <div class="goal-bar-bg" style="margin-top:10px;"><div class="goal-bar-fill" style="width:{pera_cap_pct:.1f}%;"></div></div>
+      <div class="goal-numbers"><span>₱{pera_contributions_ytd:,.0f}</span><span>₱{PERA_CONTRIBUTION_CAP:,.0f}</span></div>
+    </div>""", unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # INSIGHTS
