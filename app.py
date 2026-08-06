@@ -586,7 +586,7 @@ investment_growth_rate = (
 st.markdown(
     f'<div style="text-align:center;padding:16px 0 4px 0;">'
     f'<span style="font-family:Lora,serif;color:#0B3954;font-size:24px;font-weight:600;">'
-    f'{selected_year} Financial Overview</span></div>',
+    f'{selected_year} Flow of Tides</span></div>',
     unsafe_allow_html=True,
 )
 st.markdown(
