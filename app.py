@@ -89,7 +89,7 @@ YEARLY_CONFIG = {
         "notes": [
             "Controller purchase • Insurance paid from 2025", "", "",
             "Insurance month paid early so ×2", "Stabilization",
-            "End of 1H 2026 & Reinvest", "Mid-year insurance already paid back in April",
+            "End of 1H 2026 & Reinvest", "Mid-year insurance already paid, bought games and figurines",
             "", "", "Insurance month", "", "Year-end surplus",
         ],
         "goals_config": [
@@ -943,7 +943,7 @@ st.dataframe(
 )
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# PERA — RETIREMENT TRACKING
+# PERA — RETIREMENT TRACKING put the pera tracker below since its not being used yet
 # ═══════════════════════════════════════════════════════════════════════════════
 
 st.markdown('<div class="section-header">🏦 P.E.R.A — Retirement Tracking</div>', unsafe_allow_html=True)
